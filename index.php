@@ -8,5 +8,5 @@ if (is_logged_in()) {
         redirect('/user/dashboard.php');
     }
 } else {
-    redirect('/login.php');
+    require __DIR__ . '/login.php';
 }

@@ -122,7 +122,16 @@ class Database {
 }
 
 // App settings
+$configuredBaseUrl = '/';
+$configuredBaseUrl = trim($configuredBaseUrl);
+
+if ($configuredBaseUrl === '' || $configuredBaseUrl === '/') {
+    $configuredBaseUrl = '';
+} else {
+    $configuredBaseUrl = '/' . trim($configuredBaseUrl, '/');
+}
+
 define('SITE_NAME', 'Demografiya Tizimi');
-define('BASE_URL', '/');
+define('BASE_URL', $configuredBaseUrl);
 define('UPLOAD_PATH', __DIR__ . '/../uploads/');
-define('SITE_LOGO', BASE_URL . '/assets/images/logo.png');
+define('SITE_LOGO', (BASE_URL ?: '') . '/assets/images/logo.png');
