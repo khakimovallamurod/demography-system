@@ -1,0 +1,4 @@
+.claude/
+uploads/
+*.log
+.DS_Store
