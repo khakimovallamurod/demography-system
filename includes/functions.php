@@ -7,8 +7,27 @@ if (session_status() === PHP_SESSION_NONE) {
 
 $db = new Database();
 
+function app_url($path = '') {
+    $base = BASE_URL;
+    $path = (string) $path;
+
+    if ($path === '') {
+        return $base === '' ? '/' : $base . '/';
+    }
+
+    if (preg_match('#^https?://#i', $path)) {
+        return $path;
+    }
+
+    if ($path[0] !== '/') {
+        $path = '/' . $path;
+    }
+
+    return ($base === '' ? '' : $base) . $path;
+}
+
 function redirect($url) {
-    header("Location: " . BASE_URL . $url);
+    header('Location: ' . app_url($url));
     exit();
 }
 
@@ -55,6 +74,13 @@ function get_flash() {
         return $flash;
     }
     return null;
+}
+
+function json_response(array $payload, int $status = 200) {
+    http_response_code($status);
+    header('Content-Type: application/json; charset=UTF-8');
+    echo json_encode($payload, JSON_UNESCAPED_UNICODE);
+    exit();
 }
 
 function upload_file($file, $folder = 'lectures') {
@@ -193,6 +219,176 @@ function fetch_remote_content($url, $timeout = 12) {
 
     $response = @file_get_contents($url, false, $context);
     return $response !== false ? $response : null;
+}
+
+function http_post_json($url, array $payload, array $headers = [], $timeout = 25) {
+    $jsonPayload = json_encode($payload, JSON_UNESCAPED_UNICODE);
+    $normalizedHeaders = array_merge([
+        'Content-Type: application/json',
+        'Accept: application/json',
+    ], $headers);
+
+    if (function_exists('curl_init')) {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $jsonPayload,
+            CURLOPT_HTTPHEADER => $normalizedHeaders,
+            CURLOPT_CONNECTTIMEOUT => 8,
+            CURLOPT_TIMEOUT => $timeout,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_USERAGENT => 'DemographySystem/1.0',
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        return [
+            'ok' => $response !== false && $httpCode >= 200 && $httpCode < 300,
+            'status' => $httpCode,
+            'body' => $response ?: null,
+            'error' => $error ?: null,
+        ];
+    }
+
+    $context = stream_context_create([
+        'http' => [
+            'method' => 'POST',
+            'header' => implode("\r\n", $normalizedHeaders),
+            'content' => $jsonPayload,
+            'timeout' => $timeout,
+            'ignore_errors' => true,
+        ],
+    ]);
+
+    $response = @file_get_contents($url, false, $context);
+    $status = 0;
+    if (!empty($http_response_header[0]) && preg_match('/\s(\d{3})\s/', $http_response_header[0], $matches)) {
+        $status = (int) $matches[1];
+    }
+
+    return [
+        'ok' => $response !== false && $status >= 200 && $status < 300,
+        'status' => $status,
+        'body' => $response ?: null,
+        'error' => $response === false ? 'HTTP request failed' : null,
+    ];
+}
+
+function gemini_api_key() {
+    return trim((string) env('GEMINI_API_KEY', ''));
+}
+
+function gemini_is_enabled() {
+    return gemini_api_key() !== '';
+}
+
+function gemini_generate_text($prompt, array $options = []) {
+    if (!gemini_is_enabled()) {
+        return [
+            'ok' => false,
+            'message' => 'AI tizim hali ishga tushirilmagan',
+        ];
+    }
+
+    $model = $options['model'] ?? 'gemini-2.5-flash';
+    $temperature = isset($options['temperature']) ? (float) $options['temperature'] : 0.7;
+    $maxTokens = isset($options['max_output_tokens']) ? (int) $options['max_output_tokens'] : 1024;
+    $systemInstruction = $options['system_instruction'] ?? '';
+
+    $payload = [
+        'contents' => [[
+            'parts' => [[
+                'text' => (string) $prompt,
+            ]],
+        ]],
+        'generationConfig' => [
+            'temperature' => $temperature,
+            'maxOutputTokens' => $maxTokens,
+        ],
+    ];
+
+    if ($systemInstruction !== '') {
+        $payload['systemInstruction'] = [
+            'parts' => [[
+                'text' => $systemInstruction,
+            ]],
+        ];
+    }
+
+    $response = http_post_json(
+        'https://generativelanguage.googleapis.com/v1beta/models/' . rawurlencode($model) . ':generateContent',
+        $payload,
+        ['X-goog-api-key: ' . gemini_api_key()]
+    );
+
+    if (!$response['ok']) {
+        return [
+            'ok' => false,
+            'message' => 'AI javobini olishda xatolik yuz berdi',
+            'status' => $response['status'],
+            'error' => $response['error'],
+        ];
+    }
+
+    $decoded = json_decode((string) $response['body'], true);
+    $text = $decoded['candidates'][0]['content']['parts'][0]['text'] ?? '';
+
+    if ($text === '') {
+        return [
+            'ok' => false,
+            'message' => 'AI javobi bo‘sh qaytdi',
+            'raw' => $decoded,
+        ];
+    }
+
+    return [
+        'ok' => true,
+        'text' => trim($text),
+        'raw' => $decoded,
+    ];
+}
+
+function calculate_result_percent(array $result) {
+    $total = (int) ($result['total'] ?? 0);
+    $score = (int) ($result['score'] ?? 0);
+    return $total > 0 ? round(($score / $total) * 100, 1) : 0.0;
+}
+
+function get_student_performance_summary() {
+    global $db;
+
+    $students = [];
+    $query = $db->query("
+        SELECT
+            u.id,
+            u.full_name,
+            u.username,
+            COUNT(tr.id) AS attempts,
+            COALESCE(AVG(CASE WHEN tr.total > 0 THEN (tr.score / tr.total) * 100 END), 0) AS avg_percent,
+            COALESCE(MAX(tr.completed_at), u.created_at) AS last_activity
+        FROM users u
+        LEFT JOIN test_results tr
+            ON tr.user_id = u.id AND tr.completed_at IS NOT NULL
+        WHERE u.role = 'user'
+        GROUP BY u.id, u.full_name, u.username, u.created_at
+        ORDER BY avg_percent DESC, attempts DESC, u.full_name ASC
+    ");
+
+    if ($query) {
+        while ($row = mysqli_fetch_assoc($query)) {
+            $row['avg_percent'] = round((float) $row['avg_percent'], 1);
+            $row['attempts'] = (int) $row['attempts'];
+            $students[] = $row;
+        }
+    }
+
+    return $students;
 }
 
 function get_external_cache_path($key) {

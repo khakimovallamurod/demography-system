@@ -1,4 +1,47 @@
 <?php
+function load_env_file($path) {
+    if (!is_file($path) || !is_readable($path)) {
+        return;
+    }
+
+    $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if ($lines === false) {
+        return;
+    }
+
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if ($line === '' || strpos($line, '#') === 0 || strpos($line, '=') === false) {
+            continue;
+        }
+
+        [$name, $value] = explode('=', $line, 2);
+        $name = trim($name);
+        $value = trim($value);
+
+        if ($name === '') {
+            continue;
+        }
+
+        if (($value[0] ?? '') === '"' && substr($value, -1) === '"') {
+            $value = substr($value, 1, -1);
+        } elseif (($value[0] ?? '') === "'" && substr($value, -1) === "'") {
+            $value = substr($value, 1, -1);
+        }
+
+        $_ENV[$name] = $value;
+        $_SERVER[$name] = $value;
+        putenv($name . '=' . $value);
+    }
+}
+
+function env($key, $default = null) {
+    $value = $_ENV[$key] ?? $_SERVER[$key] ?? getenv($key);
+    return ($value === false || $value === null || $value === '') ? $default : $value;
+}
+
+load_env_file(__DIR__ . '/../.env');
+
 class Database {
     private $host = 'localhost';
     private $db_name = 'demographydb';
@@ -122,16 +165,7 @@ class Database {
 }
 
 // App settings
-$configuredBaseUrl = '/';
-$configuredBaseUrl = trim($configuredBaseUrl);
-
-if ($configuredBaseUrl === '' || $configuredBaseUrl === '/') {
-    $configuredBaseUrl = '';
-} else {
-    $configuredBaseUrl = '/' . trim($configuredBaseUrl, '/');
-}
-
 define('SITE_NAME', 'Demografiya Tizimi');
-define('BASE_URL', $configuredBaseUrl);
+define('BASE_URL', '/demography-system');
 define('UPLOAD_PATH', __DIR__ . '/../uploads/');
-define('SITE_LOGO', (BASE_URL ?: '') . '/assets/images/logo.png');
+define('SITE_LOGO', BASE_URL . '/assets/images/logo.png');

@@ -4,6 +4,8 @@
     </footer>
 </div>
 
+<?php include __DIR__ . '/components/chatbot.php'; ?>
+
 <script>
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');

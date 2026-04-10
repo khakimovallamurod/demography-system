@@ -44,7 +44,7 @@ include __DIR__ . '/../includes/admin_header.php';
 ?>
 
 <!-- Stats Cards -->
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
     <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
         <div class="flex items-center justify-between mb-3">
             <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -95,31 +95,31 @@ include __DIR__ . '/../includes/admin_header.php';
     <h3 class="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
         <i class="fas fa-bolt text-yellow-500"></i> Tezkor amallar
     </h3>
-    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <a href="<?= BASE_URL ?>/admin/lectures/create.php" class="flex items-center gap-3 p-3 bg-blue-50 hover:bg-blue-100 rounded-xl transition">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <a href="<?= BASE_URL ?>/admin/lectures/create.php" class="flex items-center gap-3 p-3 bg-blue-50 hover:bg-blue-100 rounded-xl transition min-w-0">
             <div class="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
                 <i class="fas fa-plus text-white text-sm"></i>
             </div>
-            <div>
-                <p class="text-sm font-medium text-blue-700">Ma'ruza qo'sh</p>
+            <div class="min-w-0">
+                <p class="text-sm font-medium text-blue-700 break-words">Ma'ruza qo'sh</p>
                 <p class="text-xs text-blue-500">Yangi mavzu</p>
             </div>
         </a>
-        <a href="<?= BASE_URL ?>/admin/practicals/create.php" class="flex items-center gap-3 p-3 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition">
+        <a href="<?= BASE_URL ?>/admin/practicals/create.php" class="flex items-center gap-3 p-3 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition min-w-0">
             <div class="w-9 h-9 bg-emerald-600 rounded-lg flex items-center justify-center flex-shrink-0">
                 <i class="fas fa-plus text-white text-sm"></i>
             </div>
-            <div>
-                <p class="text-sm font-medium text-emerald-700">Amaliy qo'sh</p>
+            <div class="min-w-0">
+                <p class="text-sm font-medium text-emerald-700 break-words">Amaliy qo'sh</p>
                 <p class="text-xs text-emerald-500">Yangi mashg'ulot</p>
             </div>
         </a>
-        <a href="<?= BASE_URL ?>/admin/tests/create.php" class="flex items-center gap-3 p-3 bg-orange-50 hover:bg-orange-100 rounded-xl transition">
+        <a href="<?= BASE_URL ?>/admin/tests/create.php" class="flex items-center gap-3 p-3 bg-orange-50 hover:bg-orange-100 rounded-xl transition min-w-0">
             <div class="w-9 h-9 bg-orange-500 rounded-lg flex items-center justify-center flex-shrink-0">
                 <i class="fas fa-plus text-white text-sm"></i>
             </div>
-            <div>
-                <p class="text-sm font-medium text-orange-700">Test qo'sh</p>
+            <div class="min-w-0">
+                <p class="text-sm font-medium text-orange-700 break-words">Test qo'sh</p>
                 <p class="text-xs text-orange-500">Yangi test</p>
             </div>
         </a>
@@ -130,7 +130,7 @@ include __DIR__ . '/../includes/admin_header.php';
 <div class="grid md:grid-cols-2 gap-4">
     <!-- Recent Lectures -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
-        <div class="flex items-center justify-between p-5 border-b border-gray-100">
+        <div class="flex flex-wrap items-center justify-between gap-2 p-5 border-b border-gray-100">
             <h3 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
                 <i class="fas fa-book-open text-blue-500"></i> So'nggi ma'ruzalar
             </h3>
@@ -160,7 +160,7 @@ include __DIR__ . '/../includes/admin_header.php';
 
     <!-- Recent Practicals -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
-        <div class="flex items-center justify-between p-5 border-b border-gray-100">
+        <div class="flex flex-wrap items-center justify-between gap-2 p-5 border-b border-gray-100">
             <h3 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
                 <i class="fas fa-flask text-emerald-500"></i> So'nggi amaliy mashg'ulotlar
             </h3>
@@ -191,7 +191,7 @@ include __DIR__ . '/../includes/admin_header.php';
 
 <div class="grid xl:grid-cols-2 gap-4 mt-4">
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="flex items-center justify-between p-5 border-b border-gray-100">
+        <div class="flex flex-wrap items-center justify-between gap-2 p-5 border-b border-gray-100">
             <h3 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
                 <i class="fas fa-users text-purple-500"></i> Foydalanuvchilar
             </h3>
@@ -213,7 +213,7 @@ include __DIR__ . '/../includes/admin_header.php';
                     <p class="text-sm font-medium text-gray-800 truncate"><?= h($user['full_name']) ?></p>
                     <p class="text-xs text-gray-400 truncate">@<?= h($user['username']) ?></p>
                 </div>
-                <div class="text-right flex-shrink-0">
+                <div class="text-left sm:text-right flex-shrink-0">
                     <p class="text-xs text-gray-400">Qo‘shilgan</p>
                     <p class="text-xs font-medium text-gray-600"><?= date('d.m.Y', strtotime($user['created_at'])) ?></p>
                 </div>
@@ -224,7 +224,7 @@ include __DIR__ . '/../includes/admin_header.php';
     </div>
 
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="flex items-center justify-between p-5 border-b border-gray-100">
+        <div class="flex flex-wrap items-center justify-between gap-2 p-5 border-b border-gray-100">
             <h3 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
                 <i class="fas fa-square-poll-vertical text-orange-500"></i> Test natijalari
             </h3>
@@ -252,8 +252,8 @@ include __DIR__ . '/../includes/admin_header.php';
                             </div>
                             <p class="text-xs text-gray-400 whitespace-nowrap"><?= time_ago($result['completed_at']) ?></p>
                         </div>
-                        <p class="text-sm text-gray-600 mt-2"><?= h($result['test_title']) ?></p>
-                        <div class="flex items-center justify-between gap-3 mt-2">
+                        <p class="text-sm text-gray-600 mt-2 break-words"><?= h($result['test_title']) ?></p>
+                        <div class="flex flex-col items-start justify-between gap-1 sm:flex-row sm:items-center sm:gap-3 mt-2">
                             <p class="text-xs text-gray-400"><?= (int) $result['score'] ?>/<?= (int) $result['total'] ?> to‘g‘ri javob</p>
                             <p class="text-xs font-medium text-gray-500"><?= date('d.m.Y H:i', strtotime($result['completed_at'])) ?></p>
                         </div>

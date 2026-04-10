@@ -30,7 +30,7 @@ include __DIR__ . '/../includes/user_header.php';
     <div class="flex-1 min-w-0">
 
         <!-- Welcome breadcrumb -->
-        <div class="flex items-center gap-2 text-xs text-gray-400 mb-4">
+        <div class="flex flex-wrap items-center gap-2 text-xs text-gray-400 mb-4">
             <i class="fas fa-home text-emerald-500"></i>
             <span>Bosh sahifa</span>
             <i class="fas fa-chevron-right text-gray-300"></i>
@@ -68,7 +68,7 @@ include __DIR__ . '/../includes/user_header.php';
             <div class="absolute top-1/3 right-1/3 w-12 h-8 bg-orange-200/25 rounded-[60%_40%/50%_50%]"></div>
 
             <!-- 6 Section Cards Grid -->
-            <div class="relative z-10 p-5 grid grid-cols-2 lg:grid-cols-3 gap-3">
+            <div class="relative z-10 p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
 
                 <!-- Ma'ruzalar -->
                 <a href="<?= BASE_URL ?>/user/lectures/index.php"
@@ -82,7 +82,7 @@ include __DIR__ . '/../includes/user_header.php';
                         </div>
                     </div>
                     <p class="text-xs text-gray-500 mb-3 line-clamp-2">Barcha ma'ruza mavzularini o'qing va o'rganing</p>
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
                         <span class="text-xs font-semibold bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full">
                             <?= $lecture_count ?> ta mavzu
                         </span>
@@ -104,7 +104,7 @@ include __DIR__ . '/../includes/user_header.php';
                         </div>
                     </div>
                     <p class="text-xs text-gray-500 mb-3 line-clamp-2">Amaliy vazifalar va mashqlarni bajaring</p>
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
                         <span class="text-xs font-semibold bg-amber-50 text-amber-600 px-2.5 py-1 rounded-full">
                             <?= $practical_count ?> ta
                         </span>
@@ -126,7 +126,7 @@ include __DIR__ . '/../includes/user_header.php';
                         </div>
                     </div>
                     <p class="text-xs text-gray-500 mb-3 line-clamp-2">Bilimingizni test orqali tekshiring</p>
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
                         <span class="text-xs font-semibold bg-red-50 text-red-500 px-2.5 py-1 rounded-full">
                             <?= $test_count ?> ta test
                         </span>
@@ -148,7 +148,7 @@ include __DIR__ . '/../includes/user_header.php';
                         </div>
                     </div>
                     <p class="text-xs text-gray-500 mb-3 line-clamp-2">Demografik xaritalarni PDF ko'rinishida oching</p>
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
                         <span class="text-xs font-semibold bg-indigo-50 text-indigo-600 px-2.5 py-1 rounded-full">
                             <?= $map_count ?> ta xarita
                         </span>
@@ -170,7 +170,7 @@ include __DIR__ . '/../includes/user_header.php';
                         </div>
                     </div>
                     <p class="text-xs text-gray-400 mb-3">Kitoblar, maqolalar va elektron resurslar</p>
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
                         <span class="text-xs bg-pink-50 text-pink-400 px-2.5 py-1 rounded-full">Resurslar</span>
                         <span class="text-xs text-gray-400 flex items-center gap-1">
                             <i class="fas fa-lock text-xs"></i> Yopiq
@@ -190,7 +190,7 @@ include __DIR__ . '/../includes/user_header.php';
                         </div>
                     </div>
                     <p class="text-xs text-gray-400 mb-3">Demografik ko'rsatkichlarni hisoblash</p>
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
                         <span class="text-xs bg-cyan-50 text-cyan-500 px-2.5 py-1 rounded-full">Hisoblash</span>
                         <span class="text-xs text-gray-400 flex items-center gap-1">
                             <i class="fas fa-lock text-xs"></i> Yopiq

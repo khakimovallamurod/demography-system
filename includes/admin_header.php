@@ -36,6 +36,10 @@
             <i class="fas fa-tachometer-alt w-4 text-center text-slate-400"></i>
             <span>Dashboard</span>
         </a>
+        <a href="<?= BASE_URL ?>/admin/analytics.php" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm <?= basename($_SERVER['PHP_SELF']) == 'analytics.php' ? 'active' : '' ?>">
+            <i class="fas fa-brain w-4 text-center text-cyan-300"></i>
+            <span>AI Tahlil</span>
+        </a>
 
         <p class="text-slate-500 text-xs font-semibold uppercase tracking-wider px-3 py-2 mt-2">Kontent</p>
         <a href="<?= BASE_URL ?>/admin/lectures/index.php" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm <?= strpos($_SERVER['REQUEST_URI'], '/admin/lectures/') !== false ? 'active' : '' ?>">
