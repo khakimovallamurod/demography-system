@@ -20,9 +20,9 @@
 <aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-gradient-to-b from-slate-800 to-slate-700 text-white z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
     <div class="p-5 border-b border-slate-600">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center">
-                <i class="fas fa-globe text-white text-lg"></i>
-            </div>
+            <img src="<?= SITE_LOGO ?>" alt="<?= SITE_NAME ?> logo"
+                 class="h-14 w-auto object-contain flex-shrink-0"
+                 onerror="this.style.display='none'">
             <div>
                 <h1 class="font-bold text-sm leading-tight"><?= SITE_NAME ?></h1>
                 <p class="text-slate-400 text-xs">Admin Panel</p>
@@ -49,6 +49,14 @@
         <a href="<?= BASE_URL ?>/admin/tests/index.php" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm <?= strpos($_SERVER['REQUEST_URI'], '/admin/tests/') !== false ? 'active' : '' ?>">
             <i class="fas fa-clipboard-list w-4 text-center text-orange-400"></i>
             <span>Testlar</span>
+        </a>
+        <a href="<?= BASE_URL ?>/admin/test-results/index.php" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm <?= strpos($_SERVER['REQUEST_URI'], '/admin/test-results/') !== false ? 'active' : '' ?>">
+            <i class="fas fa-square-poll-vertical w-4 text-center text-amber-300"></i>
+            <span>Test natijalari</span>
+        </a>
+        <a href="<?= BASE_URL ?>/admin/users/index.php" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm <?= strpos($_SERVER['REQUEST_URI'], '/admin/users/') !== false ? 'active' : '' ?>">
+            <i class="fas fa-users w-4 text-center text-purple-300"></i>
+            <span>Foydalanuvchilar</span>
         </a>
         <a href="<?= BASE_URL ?>/admin/maps/index.php" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm <?= strpos($_SERVER['REQUEST_URI'], '/admin/maps/') !== false ? 'active' : '' ?>">
             <i class="fas fa-map-marked-alt w-4 text-center text-indigo-400"></i>

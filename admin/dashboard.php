@@ -8,9 +8,37 @@ $total_lectures   = count($db->get_data_by_table_all('lectures'));
 $total_practicals = count($db->get_data_by_table_all('practicals'));
 $total_tests      = count($db->get_data_by_table_all('tests'));
 $total_users      = count($db->get_data_by_table_all('users', 'WHERE role = "user"'));
+$external_resources = get_dashboard_external_resources();
 
 $recent_lectures   = $db->get_data_by_table_all('lectures', 'ORDER BY created_at DESC LIMIT 5');
 $recent_practicals = $db->get_data_by_table_all('practicals', 'ORDER BY created_at DESC LIMIT 5');
+$all_users = $db->get_data_by_table_all('users', 'WHERE role = "user" ORDER BY created_at DESC');
+
+$all_test_results = [];
+$resultsQuery = $db->query("
+    SELECT
+        tr.id,
+        tr.score,
+        tr.total,
+        tr.completed_at,
+        u.full_name,
+        u.username,
+        t.title AS test_title
+    FROM test_results tr
+    INNER JOIN users u ON u.id = tr.user_id
+    INNER JOIN tests t ON t.id = tr.test_id
+    WHERE tr.completed_at IS NOT NULL
+    ORDER BY tr.completed_at DESC
+");
+
+if ($resultsQuery) {
+    while ($row = mysqli_fetch_assoc($resultsQuery)) {
+        $all_test_results[] = $row;
+    }
+}
+
+$recent_users = array_slice($all_users, 0, 5);
+$recent_test_results = array_slice($all_test_results, 0, 5);
 
 include __DIR__ . '/../includes/admin_header.php';
 ?>
@@ -161,34 +189,85 @@ include __DIR__ . '/../includes/admin_header.php';
     </div>
 </div>
 
-<!-- External Resource Banners -->
-<div class="grid sm:grid-cols-2 gap-4 mt-4">
-    <a href="https://demografiya.uz" target="_blank" rel="noopener"
-       class="bg-gradient-to-r from-blue-700 to-blue-800 rounded-2xl p-4 text-white flex items-center gap-3 hover:opacity-90 transition group">
-        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-            <i class="fas fa-chart-line text-lg"></i>
-        </div>
-        <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-1.5">
-                <h4 class="font-bold text-sm">demografiya.uz</h4>
-                <i class="fas fa-external-link-alt text-xs text-blue-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition"></i>
+<div class="grid xl:grid-cols-2 gap-4 mt-4">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="flex items-center justify-between p-5 border-b border-gray-100">
+            <h3 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <i class="fas fa-users text-purple-500"></i> Foydalanuvchilar
+            </h3>
+            <div class="flex items-center gap-2">
+                <span class="text-xs bg-purple-50 text-purple-600 px-2.5 py-1 rounded-full font-medium"><?= count($all_users) ?> ta</span>
+                <a href="<?= BASE_URL ?>/admin/users/index.php" class="text-xs text-purple-600 hover:underline">Hammasi</a>
             </div>
-            <p class="text-blue-200 text-xs mt-0.5">Demografiya portali</p>
         </div>
-    </a>
-    <a href="https://stat.uz" target="_blank" rel="noopener"
-       class="bg-gradient-to-r from-orange-600 to-red-600 rounded-2xl p-4 text-white flex items-center gap-3 hover:opacity-90 transition group">
-        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-            <i class="fas fa-database text-lg"></i>
-        </div>
-        <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-1.5">
-                <h4 class="font-bold text-sm">stat.uz</h4>
-                <i class="fas fa-external-link-alt text-xs text-orange-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition"></i>
+        <div class="max-h-[430px] overflow-y-auto divide-y divide-gray-50">
+            <?php if (empty($recent_users)): ?>
+            <p class="text-sm text-gray-400 text-center py-8">Foydalanuvchilar mavjud emas</p>
+            <?php else: ?>
+            <?php foreach ($recent_users as $user): ?>
+            <div class="flex items-center gap-3 p-4 hover:bg-gray-50 transition">
+                <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-semibold text-sm flex-shrink-0">
+                    <?= strtoupper(substr($user['full_name'] ?? 'U', 0, 1)) ?>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <p class="text-sm font-medium text-gray-800 truncate"><?= h($user['full_name']) ?></p>
+                    <p class="text-xs text-gray-400 truncate">@<?= h($user['username']) ?></p>
+                </div>
+                <div class="text-right flex-shrink-0">
+                    <p class="text-xs text-gray-400">Qo‘shilgan</p>
+                    <p class="text-xs font-medium text-gray-600"><?= date('d.m.Y', strtotime($user['created_at'])) ?></p>
+                </div>
             </div>
-            <p class="text-orange-100 text-xs mt-0.5">O'zbekiston statistika qo'mitasi</p>
+            <?php endforeach; ?>
+            <?php endif; ?>
         </div>
-    </a>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="flex items-center justify-between p-5 border-b border-gray-100">
+            <h3 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <i class="fas fa-square-poll-vertical text-orange-500"></i> Test natijalari
+            </h3>
+            <div class="flex items-center gap-2">
+                <span class="text-xs bg-orange-50 text-orange-600 px-2.5 py-1 rounded-full font-medium"><?= count($all_test_results) ?> ta</span>
+                <a href="<?= BASE_URL ?>/admin/test-results/index.php" class="text-xs text-orange-600 hover:underline">Hammasi</a>
+            </div>
+        </div>
+        <div class="max-h-[430px] overflow-y-auto divide-y divide-gray-50">
+            <?php if (empty($recent_test_results)): ?>
+            <p class="text-sm text-gray-400 text-center py-8">Test natijalari hali yo‘q</p>
+            <?php else: ?>
+            <?php foreach ($recent_test_results as $result): ?>
+            <?php $percent = (int) ($result['total'] > 0 ? round(($result['score'] / $result['total']) * 100) : 0); ?>
+            <div class="p-4 hover:bg-gray-50 transition">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0 <?= $percent >= 70 ? 'bg-emerald-100 text-emerald-700' : ($percent >= 50 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-600') ?>">
+                        <?= $percent ?>%
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0">
+                                <p class="text-sm font-medium text-gray-800 truncate"><?= h($result['full_name']) ?></p>
+                                <p class="text-xs text-gray-400 truncate">@<?= h($result['username']) ?></p>
+                            </div>
+                            <p class="text-xs text-gray-400 whitespace-nowrap"><?= time_ago($result['completed_at']) ?></p>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-2"><?= h($result['test_title']) ?></p>
+                        <div class="flex items-center justify-between gap-3 mt-2">
+                            <p class="text-xs text-gray-400"><?= (int) $result['score'] ?>/<?= (int) $result['total'] ?> to‘g‘ri javob</p>
+                            <p class="text-xs font-medium text-gray-500"><?= date('d.m.Y H:i', strtotime($result['completed_at'])) ?></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <?php include __DIR__ . '/../includes/external_resource_cards.php'; ?>
 </div>
 
 <?php include __DIR__ . '/../includes/admin_footer.php'; ?>

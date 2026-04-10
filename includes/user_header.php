@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         .nav-link { transition: all 0.2s; border-left: 3px solid transparent; }
-        .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.15); border-left-color: #6ee7b7; }
+        .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.15); border-left-color: rgb(31, 160, 52); }
         .card-hover { transition: transform 0.18s, box-shadow 0.18s; }
         .card-hover:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,0,0,0.12); }
     </style>
@@ -17,13 +17,13 @@
 <body class="bg-gray-50 min-h-screen">
 
 <!-- Sidebar -->
-<aside id="sidebar" class="fixed top-0 left-0 h-full w-60 bg-gradient-to-b from-emerald-800 to-teal-700 text-white z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+<aside id="sidebar" class="fixed top-0 left-0 h-full w-60 bg-gradient-to-b from-emerald-950 via-emerald-900 to-teal-900 text-white z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
     <!-- Logo -->
-    <div class="p-4 border-b border-emerald-700">
+    <div class="p-4 border-b border-emerald-800">
         <div class="flex items-center gap-2.5">
-            <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur">
-                <i class="fas fa-globe text-white"></i>
-            </div>
+            <img src="<?= SITE_LOGO ?>" alt="<?= SITE_NAME ?> logo"
+                 class="h-14 w-auto object-contain flex-shrink-0"
+                 onerror="this.style.display='none'">
             <div>
                 <p class="font-bold text-sm leading-tight"><?= SITE_NAME ?></p>
                 <p class="text-emerald-300 text-xs">Talaba kabineti</p>
@@ -32,7 +32,7 @@
     </div>
 
     <!-- User info -->
-    <div class="px-4 py-3 border-b border-emerald-700">
+    <div class="px-4 py-3 border-b border-emerald-800">
         <div class="flex items-center gap-2.5">
             <div class="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
                 <?= strtoupper(substr($_SESSION['full_name'] ?? 'U', 0, 1)) ?>
@@ -66,7 +66,7 @@
             <i class="fas fa-map-marked-alt w-4 text-center text-indigo-300"></i> Xaritalar
         </a>
 
-        <div class="pt-3 mt-2 border-t border-emerald-700">
+        <div class="pt-3 mt-2 border-t border-emerald-800">
             <a href="<?= BASE_URL ?>/logout.php"
                class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-300 hover:text-red-200">
                 <i class="fas fa-sign-out-alt w-4 text-center"></i> Chiqish

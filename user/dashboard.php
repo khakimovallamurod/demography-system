@@ -9,6 +9,7 @@ $lecture_count   = count($db->get_data_by_table_all('lectures'));
 $practical_count = count($db->get_data_by_table_all('practicals'));
 $test_count      = count($db->get_data_by_table_all('tests'));
 $map_count       = count($db->get_data_by_table_all('maps'));
+$external_resources = get_dashboard_external_resources();
 
 $user_results = $db->get_data_by_table_all('test_results',
     "WHERE user_id = {$_SESSION['user_id']} AND completed_at IS NOT NULL ORDER BY completed_at DESC LIMIT 5");
@@ -200,34 +201,8 @@ include __DIR__ . '/../includes/user_header.php';
             </div>
         </div>
 
-        <!-- Bottom Banners -->
-        <div class="grid sm:grid-cols-2 gap-4">
-            <a href="https://demografiya.uz/" target="_blank" rel="noopener"
-               class="bg-gradient-to-r from-blue-700 to-blue-800 rounded-2xl p-4 text-white flex items-center gap-3 hover:opacity-90 transition group">
-                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-chart-line text-lg"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-1.5">
-                        <h4 class="font-bold text-sm">demografiya.uz</h4>
-                        <i class="fas fa-external-link-alt text-xs text-blue-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition"></i>
-                    </div>
-                    <p class="text-blue-200 text-xs mt-0.5">Demografiya portali</p>
-                </div>
-            </a>
-            <a href="https://stat.uz" target="_blank" rel="noopener"
-               class="bg-gradient-to-r from-orange-600 to-red-600 rounded-2xl p-4 text-white flex items-center gap-3 hover:opacity-90 transition group">
-                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-database text-lg"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-1.5">
-                        <h4 class="font-bold text-sm">stat.uz</h4>
-                        <i class="fas fa-external-link-alt text-xs text-orange-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition"></i>
-                    </div>
-                    <p class="text-orange-100 text-xs mt-0.5">O'zbekiston statistika qo'mitasi</p>
-                </div>
-            </a>
+        <div class="mt-4">
+            <?php include __DIR__ . '/../includes/external_resource_cards.php'; ?>
         </div>
     </div>
 
@@ -247,7 +222,7 @@ include __DIR__ . '/../includes/user_header.php';
                     <div class="relative w-28 h-28">
                         <svg viewBox="0 0 100 100" class="w-full h-full -rotate-90">
                             <circle cx="50" cy="50" r="42" fill="none" stroke="#e5e7eb" stroke-width="10"/>
-                            <circle cx="50" cy="50" r="42" fill="none" stroke="#059669" stroke-width="10"
+                            <circle cx="50" cy="50" r="42" fill="none" stroke="#147c5b" stroke-width="10"
                                 stroke-dasharray="<?= round($avg_score / 100 * 263.9) ?> 263.9"
                                 stroke-linecap="round"/>
                         </svg>

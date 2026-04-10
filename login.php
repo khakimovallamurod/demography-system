@@ -43,10 +43,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <!-- Card -->
         <div class="bg-white rounded-2xl shadow-md p-8">
             <!-- Logo inside card -->
-            <div class="flex items-center gap-3 mb-6 pb-5 border-b border-gray-100">
-                <div class="w-11 h-11 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-globe text-white text-lg"></i>
-                </div>
+            <div class="flex items-center gap-4 mb-6 pb-5 border-b border-gray-100">
+                <img src="<?= SITE_LOGO ?>" alt="<?= SITE_NAME ?> logo"
+                     class="h-20 w-auto object-contain flex-shrink-0"
+                     onerror="this.style.display='none'">
                 <div>
                     <h1 class="font-bold text-gray-800 leading-tight"><?= SITE_NAME ?></h1>
                     <p class="text-xs text-gray-400">Tizimga kirish</p>
