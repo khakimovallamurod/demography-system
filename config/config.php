@@ -123,6 +123,6 @@ class Database {
 
 // App settings
 define('SITE_NAME', 'Demografiya Tizimi');
-define('BASE_URL', '/demography-system');
+define('BASE_URL', '/');
 define('UPLOAD_PATH', __DIR__ . '/../uploads/');
 define('SITE_LOGO', BASE_URL . '/assets/images/logo.png');
