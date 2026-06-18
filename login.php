@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Username va parolni kiriting!';
     } else {
         $user = $db->get_data_by_table('users', ['username' => $db->escape($username)]);
-        if ($user && password_verify($password, $user['password'])) {
+        if ($user && md5($password) === $user['password']) {
             $_SESSION['user_id']   = $user['id'];
             $_SESSION['username']  = $user['username'];
             $_SESSION['full_name'] = $user['full_name'];

@@ -8,7 +8,7 @@ $chatbotRole = is_admin() ? 'admin' : 'user';
     data-chatbot
     data-endpoint="<?= h($chatbotEndpoint) ?>"
     data-role="<?= h($chatbotRole) ?>"
-    class="fixed bottom-5 right-5 z-[70] sm:bottom-6 sm:right-6"
+    class="fixed bottom-48 right-5 z-[70] md:bottom-28 md:right-6"
 >
     <button
         type="button"

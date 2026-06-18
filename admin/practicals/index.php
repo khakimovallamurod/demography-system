@@ -3,7 +3,7 @@ require_once __DIR__ . '/../../includes/functions.php';
 require_admin();
 
 $page_title = "Amaliy mashg'ulotlar";
-$practicals = $db->get_data_by_table_all('practicals', 'ORDER BY created_at DESC');
+$practicals = $db->get_data_by_table_all('practicals', 'ORDER BY order_num ASC, id ASC');
 
 include __DIR__ . '/../../includes/admin_header.php';
 ?>
@@ -55,9 +55,9 @@ include __DIR__ . '/../../includes/admin_header.php';
                     </td>
                     <td class="px-5 py-3.5 hidden sm:table-cell">
                         <?php if ($p['file_path']): ?>
-                        <a href="<?= BASE_URL ?>/<?= h($p['file_path']) ?>" target="_blank"
+                        <a href="<?= BASE_URL ?>/admin/practicals/view.php?id=<?= $p['id'] ?>"
                            class="inline-flex items-center gap-1 text-emerald-600 hover:underline text-xs">
-                            <i class="fas fa-paperclip"></i> <?= h(mb_substr($p['file_name'] ?? 'Fayl', 0, 20)) ?>
+                            <i class="fas fa-eye"></i> Ko'rish
                         </a>
                         <?php else: ?>
                         <span class="text-gray-400 text-xs">—</span>

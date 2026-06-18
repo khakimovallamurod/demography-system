@@ -112,8 +112,8 @@ function upload_file($file, $folder = 'lectures') {
         return ['success' => false, 'message' => 'Fayl haqiqiy PDF emas!'];
     }
 
-    if ($file['size'] > 2 * 1024 * 1024) {
-        return ['success' => false, 'message' => 'Fayl hajmi 2MB dan oshmasligi kerak!'];
+    if ($file['size'] > 20 * 1024 * 1024) {
+        return ['success' => false, 'message' => 'Fayl hajmi 20MB dan oshmasligi kerak!'];
     }
 
     $upload_dir = UPLOAD_PATH . $folder . '/';
@@ -126,14 +126,49 @@ function upload_file($file, $folder = 'lectures') {
 
     if (move_uploaded_file($file['tmp_name'], $filepath)) {
         chmod($filepath, 0644);
+        
+        $thumbnail_path = null;
+        $thumb_dir = rtrim(UPLOAD_PATH, '/') . '/' . $folder . '/thumbs/';
+        if (!is_dir($thumb_dir)) {
+            @mkdir($thumb_dir, 0777, true);
+        }
+        $thumb_prefix = $thumb_dir . pathinfo($filename, PATHINFO_FILENAME);
+        $cmd = "/usr/bin/pdftoppm -jpeg -f 1 -l 1 " . escapeshellarg($filepath) . " " . escapeshellarg($thumb_prefix);
+        exec($cmd, $output, $return_var);
+        
+        if ($return_var === 0) {
+            $expected_thumb = $thumb_prefix . '-1.jpg';
+            if (file_exists($expected_thumb)) {
+                $thumbnail_path = 'uploads/' . $folder . '/thumbs/' . pathinfo($filename, PATHINFO_FILENAME) . '-1.jpg';
+            }
+        }
+
         return [
             'success'   => true,
             'file_path' => 'uploads/' . $folder . '/' . $filename,
-            'file_name' => $file['name']
+            'file_name' => $file['name'],
+            'thumbnail' => $thumbnail_path
         ];
     }
 
     return ['success' => false, 'message' => 'Fayl yuklashda xatolik! (move_uploaded_file muvaffaqiyatsiz)'];
+}
+
+function die_with_swal($title, $text, $icon = 'error') {
+    echo '<!DOCTYPE html><html><head><script src="https://cdn.tailwindcss.com"></script><script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script></head><body class="bg-gray-50"><script>
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            icon: "'.htmlspecialchars($icon, ENT_QUOTES).'",
+            title: "'.htmlspecialchars($title, ENT_QUOTES).'",
+            text: "'.htmlspecialchars($text, ENT_QUOTES).'",
+            confirmButtonText: "Orqaga qaytish",
+            confirmButtonColor: "#3b82f6"
+        }).then(function() {
+            window.history.back();
+        });
+    });
+    </script></body></html>';
+    exit;
 }
 
 function time_ago($datetime) {
@@ -598,6 +633,50 @@ function get_dashboard_external_resources() {
 
         return parse_stat_uz_resource($html);
     });
+
+    $resources[] = [
+        'site_key' => 'siat',
+        'site_name' => 'siat.stat.uz',
+        'url' => 'https://siat.stat.uz/about-us',
+        'title' => 'Statistika agentligi (SIAT)',
+        'summary' => 'O\'zbekiston Respublikasi rasmiy statistikasi va ochiq ma\'lumotlar portali.',
+        'items' => [
+            ['label' => 'Turi', 'value' => 'Davlat portali', 'note' => 'Rasmiy manba'],
+            ['label' => 'Yo\'nalish', 'value' => 'Statistika', 'note' => 'Ochiq ma\'lumotlar'],
+        ],
+        'updated_at' => date('d.m.Y H:i'),
+        'status' => 'Onlayn',
+        'accent' => [
+            'shell' => 'from-emerald-500 via-teal-500 to-green-500',
+            'soft' => 'from-emerald-50 to-teal-50',
+            'ring' => 'border-emerald-100',
+            'icon' => 'bg-emerald-500/15 text-emerald-700',
+            'badge' => 'bg-emerald-500/15 text-emerald-700',
+            'button' => 'bg-emerald-600 hover:bg-emerald-700',
+        ],
+    ];
+
+    $resources[] = [
+        'site_key' => 'democalc',
+        'site_name' => 'demographic-calculator.vercel.app',
+        'url' => 'https://demographic-calculator.vercel.app/',
+        'title' => 'Demographic Calculator',
+        'summary' => 'Aholi demografiyasi, o\'sish sur\'atlari va prognozlarni hisoblash uchun maxsus vosita.',
+        'items' => [
+            ['label' => 'Turi', 'value' => 'Hisoblash vositasi', 'note' => 'Web ilova'],
+            ['label' => 'Yo\'nalish', 'value' => 'Tahlil va Prognoz', 'note' => 'Demografik modellar'],
+        ],
+        'updated_at' => date('d.m.Y H:i'),
+        'status' => 'Onlayn',
+        'accent' => [
+            'shell' => 'from-violet-500 via-purple-500 to-fuchsia-500',
+            'soft' => 'from-violet-50 to-purple-50',
+            'ring' => 'border-violet-100',
+            'icon' => 'bg-violet-500/15 text-violet-700',
+            'badge' => 'bg-violet-500/15 text-violet-700',
+            'button' => 'bg-violet-600 hover:bg-violet-700',
+        ],
+    ];
 
     return array_values(array_filter($resources, 'is_array'));
 }

@@ -22,6 +22,8 @@ foreach ($answers as $a) {
 
 $percent = $result['total'] > 0 ? round($result['score'] / $result['total'] * 100) : 0;
 
+$is_passed = $percent >= 60;
+
 if ($percent >= 86)      { $grade = 'A'; $grade_text = 'Ajoyib!';      $color = 'green'; }
 elseif ($percent >= 71)  { $grade = 'B'; $grade_text = 'Yaxshi!';      $color = 'blue'; }
 elseif ($percent >= 56)  { $grade = 'C'; $grade_text = 'Qoniqarli';    $color = 'yellow'; }
@@ -29,6 +31,9 @@ else                     { $grade = 'D'; $grade_text = 'Qayta ishlang'; $color =
 
 $page_title = 'Test natijasi';
 include __DIR__ . '/../../includes/user_header.php';
+
+$show_alert = isset($_SESSION['show_result_alert']);
+if ($show_alert) unset($_SESSION['show_result_alert']);
 ?>
 
 <div class="max-w-3xl mx-auto">
@@ -41,11 +46,24 @@ include __DIR__ . '/../../includes/user_header.php';
                'from-red-500 to-red-700')) ?>
             p-8 text-white text-center">
 
-            <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 relative">
                 <span class="text-4xl font-bold"><?= $grade ?></span>
+                <?php if ($is_passed): ?>
+                <div class="absolute -bottom-2 -right-2 bg-green-500 text-white w-8 h-8 rounded-full flex items-center justify-center border-2 border-white shadow-sm" title="O'tdi">
+                    <i class="fas fa-check text-sm"></i>
+                </div>
+                <?php else: ?>
+                <div class="absolute -bottom-2 -right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center border-2 border-white shadow-sm" title="O'ta olmadi">
+                    <i class="fas fa-times text-sm"></i>
+                </div>
+                <?php endif; ?>
             </div>
             <h2 class="text-2xl font-bold mb-1"><?= $grade_text ?></h2>
-            <p class="text-white/80 text-sm"><?= h($test['title'] ?? '') ?></p>
+            <p class="text-white/80 text-sm mb-3"><?= h($test['title'] ?? '') ?></p>
+            
+            <span class="inline-block px-4 py-1.5 rounded-full text-sm font-bold bg-white/20 border border-white/30 <?= $is_passed ? 'text-green-50' : 'text-red-50' ?>">
+                Holati: <?= $is_passed ? "Testdan o'tdingiz" : "Testdan o'ta olmadingiz" ?>
+            </span>
 
             <div class="grid grid-cols-3 gap-4 mt-6">
                 <div class="bg-white/20 rounded-xl p-3">
@@ -111,24 +129,29 @@ include __DIR__ . '/../../includes/user_header.php';
                     <?php foreach ($options as $oi => $o):
                         $is_selected = ($o['id'] == $selected_id);
                         $is_correct_opt = (bool)$o['is_correct'];
+                        
+                        if ($is_selected && $is_correct_opt) {
+                            $classes = 'bg-green-50 border border-green-200 text-green-700';
+                            $icon = '<i class="fas fa-check text-green-500 ml-auto text-xs"></i>';
+                            $letter_classes = 'bg-green-500 text-white';
+                        } elseif ($is_selected && !$is_correct_opt) {
+                            $classes = 'bg-red-50 border border-red-200 text-red-600';
+                            $icon = '<i class="fas fa-times text-red-400 ml-auto text-xs"></i>';
+                            $letter_classes = 'bg-red-500 text-white';
+                        } else {
+                            $classes = 'bg-gray-50 border border-transparent text-gray-600';
+                            $icon = '';
+                            $letter_classes = 'bg-gray-200 text-gray-500';
+                        }
                     ?>
-                    <div class="flex items-center gap-2.5 p-2.5 rounded-xl text-sm
-                        <?= $is_correct_opt ? 'bg-green-50 border border-green-200' :
-                           ($is_selected && !$is_correct_opt ? 'bg-red-50 border border-red-200' : 'bg-gray-50 border border-transparent') ?>">
-                        <span class="w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center flex-shrink-0
-                            <?= $is_correct_opt ? 'bg-green-500 text-white' :
-                               ($is_selected ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-500') ?>">
+                    <div class="flex items-center gap-2.5 p-2.5 rounded-xl text-sm <?= $classes ?>">
+                        <span class="w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center flex-shrink-0 <?= $letter_classes ?>">
                             <?= chr(65 + $oi) ?>
                         </span>
-                        <span class="<?= $is_correct_opt ? 'text-green-700 font-medium' :
-                                        ($is_selected ? 'text-red-600' : 'text-gray-600') ?>">
+                        <span class="font-medium">
                             <?= h($o['option_text']) ?>
                         </span>
-                        <?php if ($is_correct_opt): ?>
-                        <i class="fas fa-check text-green-500 ml-auto text-xs"></i>
-                        <?php elseif ($is_selected): ?>
-                        <i class="fas fa-times text-red-400 ml-auto text-xs"></i>
-                        <?php endif; ?>
+                        <?= $icon ?>
                     </div>
                     <?php endforeach; ?>
                 </div>
@@ -136,6 +159,45 @@ include __DIR__ . '/../../includes/user_header.php';
         </div>
         <?php endforeach; ?>
     </div>
+
+    <!-- Navigation Buttons -->
+    <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <a href="<?= BASE_URL ?>/user/lectures/view.php?id=<?= $test['module_id'] ?>" class="w-full sm:w-auto bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-8 py-3.5 rounded-xl transition shadow-sm flex items-center justify-center gap-2">
+            <i class="fas fa-arrow-left"></i> Ma'ruzaga qaytish
+        </a>
+        <?php if ($is_passed): ?>
+        <a href="<?= BASE_URL ?>/user/lectures/index.php" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3.5 rounded-xl transition shadow-md flex items-center justify-center gap-2">
+            Keyingi ma'ruzaga o'tish <i class="fas fa-arrow-right"></i>
+        </a>
+        <?php endif; ?>
+    </div>
 </div>
+
+<?php if ($show_alert): ?>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const isPassed = <?= $is_passed ? 'true' : 'false' ?>;
+    const percent = <?= $percent ?>;
+    
+    if (isPassed) {
+        Swal.fire({
+            title: "Tabriklaymiz, o'tdingiz!",
+            text: `Siz ${percent}% natija ko'rsatib, testdan muvaffaqiyatli o'tdingiz.`,
+            icon: 'success',
+            confirmButtonText: 'Davom etish',
+            confirmButtonColor: '#10b981'
+        });
+    } else {
+        Swal.fire({
+            title: "Afsuski, o'ta olmadingiz!",
+            text: `Siz ${percent}% natija ko'rsatdingiz. O'tish bali kamida 60%. Qayta urinib ko'ring!`,
+            icon: 'error',
+            confirmButtonText: 'Tushunarli',
+            confirmButtonColor: '#ef4444'
+        });
+    }
+});
+</script>
+<?php endif; ?>
 
 <?php include __DIR__ . '/../../includes/user_footer.php'; ?>

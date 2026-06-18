@@ -35,6 +35,19 @@ include __DIR__ . '/../../includes/admin_header.php';
         <?php foreach ($tests as $t):
             $q_count_res = $db->query("SELECT COUNT(*) as cnt FROM questions WHERE test_id = {$t['id']}");
             $q_count = mysqli_fetch_assoc($q_count_res)['cnt'];
+            
+            $module_name = 'Belgilanmagan';
+            $module_icon = 'fas fa-book';
+            $module_color = 'gray';
+            if (!empty($t['module_id'])) {
+                $table = ($t['module_type'] == 0) ? 'lectures' : 'practicals';
+                $mod = $db->get_data_by_table($table, ['id' => $t['module_id']]);
+                if ($mod) {
+                    $module_name = ($t['module_type'] == 0 ? "Ma'ruza: " : "Amaliyot: ") . mb_substr($mod['title'], 0, 40) . (mb_strlen($mod['title']) > 40 ? '...' : '');
+                    $module_icon = ($t['module_type'] == 0) ? 'fas fa-book-open' : 'fas fa-chalkboard-teacher';
+                    $module_color = ($t['module_type'] == 0) ? 'blue' : 'emerald';
+                }
+            }
         ?>
         <div class="p-5 hover:bg-gray-50 transition">
             <div class="flex flex-col sm:flex-row sm:items-center gap-4">
@@ -48,9 +61,15 @@ include __DIR__ . '/../../includes/admin_header.php';
                             <p class="text-xs text-gray-400 mt-0.5"><?= h(mb_substr($t['description'] ?? '', 0, 80)) ?></p>
                         </div>
                     </div>
-                    <div class="flex items-center gap-4 ml-12 mt-1">
+                    <div class="flex items-center gap-4 ml-12 mt-1 flex-wrap">
+                        <span class="text-xs text-<?= $module_color ?>-700 bg-<?= $module_color ?>-50 px-2 py-0.5 rounded-md flex items-center gap-1 font-medium border border-<?= $module_color ?>-100">
+                            <i class="<?= $module_icon ?>"></i> <?= h($module_name) ?>
+                        </span>
                         <span class="text-xs text-gray-500 flex items-center gap-1">
-                            <i class="fas fa-question-circle text-gray-400"></i> <?= $q_count ?> savol
+                            <i class="fas fa-question-circle text-gray-400"></i> Baza: <?= $q_count ?> | Testda: <?= $t['questions_limit'] ?? 20 ?>
+                        </span>
+                        <span class="text-xs text-gray-500 flex items-center gap-1">
+                            <i class="fas fa-redo text-gray-400"></i> Urinishlar: <?= $t['attempts_limit'] ?? 1 ?>
                         </span>
                         <span class="text-xs text-gray-500 flex items-center gap-1">
                             <i class="fas fa-clock text-gray-400"></i> <?= $t['duration'] ?> daqiqa

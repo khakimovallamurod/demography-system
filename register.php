@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = $db->insert('users', [
                 'full_name' => $full_name,
                 'username'  => $username,
-                'password'  => password_hash($password, PASSWORD_DEFAULT),
+                'password'  => md5($password),
                 'role'      => 'user'
             ]);
             if ($id) {

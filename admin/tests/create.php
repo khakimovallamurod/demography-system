@@ -5,19 +5,46 @@ require_admin();
 $page_title = "Test qo'shish";
 $errors = [];
 
+// Load data for Select2
+$lectures_res = $db->query("SELECT id, title FROM lectures ORDER BY id ASC");
+$lectures = [];
+if ($lectures_res) {
+    while($row = mysqli_fetch_assoc($lectures_res)) $lectures[] = $row;
+}
+
+$practicals_res = $db->query("SELECT id, title FROM practicals ORDER BY id ASC");
+$practicals = [];
+if ($practicals_res) {
+    while($row = mysqli_fetch_assoc($practicals_res)) $practicals[] = $row;
+}
+
+$lectures_json = json_encode($lectures);
+$practicals_json = json_encode($practicals);
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $title       = trim($_POST['title'] ?? '');
-    $description = trim($_POST['description'] ?? '');
-    $duration    = (int)($_POST['duration'] ?? 30);
+    $title           = trim($_POST['title'] ?? '');
+    $description     = trim($_POST['description'] ?? '');
+    $duration        = (int)($_POST['duration'] ?? 30);
+    $attempts_limit  = (int)($_POST['attempts_limit'] ?? 1);
+    $questions_limit = (int)($_POST['questions_limit'] ?? 20);
+    $module_type     = (int)($_POST['module_type'] ?? 0);
+    $module_id       = (int)($_POST['module_id'] ?? 0);
 
     if (empty($title)) $errors[] = 'Sarlavha kiritilishi shart!';
     if ($duration < 1) $errors[] = 'Vaqt 1 daqiqadan kam bo\'lmasligi kerak!';
+    if ($attempts_limit < 1) $errors[] = 'Urinishlar soni kamida 1 marta bo\'lishi kerak!';
+    if ($questions_limit < 1) $errors[] = 'Savollar soni kamida 1 ta bo\'lishi kerak!';
+    if (empty($module_id)) $errors[] = 'Mavzu (Ma\'ruza yoki Amaliyot) tanlanishi shart!';
 
     if (empty($errors)) {
         $id = $db->insert('tests', [
-            'title'       => $title,
-            'description' => $description,
-            'duration'    => $duration
+            'title'           => $title,
+            'description'     => $description,
+            'duration'        => $duration,
+            'attempts_limit'  => $attempts_limit,
+            'questions_limit' => $questions_limit,
+            'module_type'     => $module_type,
+            'module_id'       => $module_id
         ]);
         if ($id) {
             flash_message('success', "Test yaratildi! Endi savollar qo'shing.");
@@ -31,7 +58,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 include __DIR__ . '/../../includes/admin_header.php';
 ?>
 
-<div class="max-w-2xl mx-auto">
+<!-- Include Select2 -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    .select2-container .select2-selection--single {
+        height: 42px !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 0.75rem !important;
+        display: flex;
+        align-items: center;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 40px !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #374151 !important;
+        font-size: 0.875rem !important;
+        padding-left: 1rem !important;
+    }
+    .select2-search__field {
+        border-radius: 0.5rem !important;
+    }
+    .select2-dropdown {
+        border: 1px solid #e5e7eb !important;
+        border-radius: 0.75rem !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+    }
+</style>
+
+<div class="max-w-2xl mx-auto pb-10">
     <div class="flex items-center gap-3 mb-6">
         <a href="<?= BASE_URL ?>/admin/tests/index.php"
            class="w-9 h-9 bg-white border border-gray-200 rounded-xl flex items-center justify-center hover:bg-gray-50 transition">
@@ -50,6 +105,28 @@ include __DIR__ . '/../../includes/admin_header.php';
 
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <form method="POST" class="space-y-5">
+            
+            <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 mb-2">
+                <label class="block text-sm font-medium text-gray-700 mb-3">Test qaysi bo'lim uchun?</label>
+                <div class="flex gap-6 mb-4">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="module_type" value="0" <?= (isset($_POST['module_type']) && $_POST['module_type'] == '0') ? 'checked' : (empty($_POST) ? 'checked' : '') ?> class="w-4 h-4 accent-orange-500" onchange="updateModules()"> 
+                        <span class="text-sm font-medium text-gray-700">Ma'ruza</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="module_type" value="1" <?= (isset($_POST['module_type']) && $_POST['module_type'] == '1') ? 'checked' : '' ?> class="w-4 h-4 accent-orange-500" onchange="updateModules()"> 
+                        <span class="text-sm font-medium text-gray-700">Amaliyot</span>
+                    </label>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Mavzuni tanlang <span class="text-red-500">*</span></label>
+                    <select name="module_id" id="module_id" class="w-full" required>
+                        <option value="">Tanlang...</option>
+                    </select>
+                </div>
+            </div>
+
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1.5">Sarlavha <span class="text-red-500">*</span></label>
                 <input type="text" name="title" value="<?= h($_POST['title'] ?? '') ?>"
@@ -76,6 +153,25 @@ include __DIR__ . '/../../includes/admin_header.php';
                 </div>
             </div>
 
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                        Urinishlar soni
+                    </label>
+                    <input type="number" name="attempts_limit" value="<?= (int)($_POST['attempts_limit'] ?? 1) ?>"
+                        min="1" max="100"
+                        class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                        Ishlanadigan savollar soni
+                    </label>
+                    <input type="number" name="questions_limit" value="<?= (int)($_POST['questions_limit'] ?? 20) ?>"
+                        min="1" max="500"
+                        class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                </div>
+            </div>
+
             <div class="bg-blue-50 rounded-xl p-4 text-sm text-blue-700 flex items-start gap-2">
                 <i class="fas fa-info-circle mt-0.5"></i>
                 <p>Test yaratilgandan so'ng savollar qo'shish sahifasiga o'tasiz.</p>
@@ -94,5 +190,46 @@ include __DIR__ . '/../../includes/admin_header.php';
         </form>
     </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    const lectures = <?= $lectures_json ?>;
+    const practicals = <?= $practicals_json ?>;
+    const selectedModuleId = <?= (int)($_POST['module_id'] ?? 0) ?>;
+
+    function updateModules() {
+        const type = document.querySelector('input[name="module_type"]:checked').value;
+        const select = $('#module_id');
+        
+        select.empty();
+        select.append(new Option('Tanlang...', '', false, false));
+        
+        const data = type === '0' ? lectures : practicals;
+        
+        data.forEach(item => {
+            const isSelected = (parseInt(item.id) === selectedModuleId);
+            const newOption = new Option(item.title, item.id, false, isSelected);
+            select.append(newOption);
+        });
+        
+        select.trigger('change');
+    }
+
+    $(document).ready(function() {
+        $('#module_id').select2({
+            placeholder: "Mavzuni qidiring yoki tanlang",
+            allowClear: true,
+            width: '100%',
+            language: {
+                noResults: function() {
+                    return "Ma'lumot topilmadi";
+                }
+            }
+        });
+        
+        updateModules();
+    });
+</script>
 
 <?php include __DIR__ . '/../../includes/admin_footer.php'; ?>

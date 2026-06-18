@@ -16,11 +16,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title       = trim($_POST['title'] ?? '');
     $description = trim($_POST['description'] ?? '');
     $content     = trim($_POST['content'] ?? '');
+    $order_num   = (int)($_POST['order_num'] ?? 0);
 
     if (empty($title)) $errors[] = 'Sarlavha kiritilishi shart!';
 
     if (empty($errors)) {
-        $data = ['title' => $title, 'description' => $description, 'content' => $content];
+        $data = ['title' => $title, 'description' => $description, 'content' => $content, 'order_num' => $order_num];
 
         if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
             $upload = upload_file($_FILES['file'], 'practicals');
@@ -70,6 +71,17 @@ include __DIR__ . '/../../includes/admin_header.php';
                 <label class="block text-sm font-medium text-gray-700 mb-1.5">Sarlavha <span class="text-red-500">*</span></label>
                 <input type="text" name="title" value="<?= h($practical['title']) ?>"
                     class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent" required>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                    Tartib raqami <span class="text-red-500">*</span>
+                </label>
+                <input type="number" name="order_num"
+                    value="<?= h($practical['order_num'] ?? '0') ?>"
+                    class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    required>
+                <p class="text-xs text-gray-500 mt-1">Ushbu amaliyotning qulfi aynan shu tartib raqamidagi ma'ruza tugatilganda ochiladi.</p>
             </div>
 
             <div>

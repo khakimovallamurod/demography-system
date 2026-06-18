@@ -22,18 +22,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $correct_option = (int)($_POST['correct_option'] ?? 0);
 
     if (empty($question_text)) $errors[] = 'Savol matni kiritilishi shart!';
-    if (count(array_filter($new_options)) < 2) $errors[] = 'Kamida 2 ta javob varianti kiriting!';
+    
+    // Filter empty options
+    $filtered_options = [];
+    $new_correct_index = -1;
+    $opt_idx = 0;
+    foreach ($new_options as $oi => $opt) {
+        if (trim($opt) !== '') {
+            $filtered_options[] = trim($opt);
+            if ((int)$oi === $correct_option) {
+                $new_correct_index = $opt_idx;
+            }
+            $opt_idx++;
+        }
+    }
+
+    if (count($filtered_options) < 2) $errors[] = 'Kamida 2 ta javob varianti kiriting!';
+    if ($new_correct_index < 0 || $new_correct_index >= count($filtered_options)) $errors[] = 'To\'g\'ri javobni belgilang!';
 
     if (empty($errors)) {
         $db->update('questions', ['question_text' => $question_text], "id = $id");
         $db->delete('options', "question_id = $id");
 
-        foreach ($new_options as $i => $opt) {
-            if (trim($opt) === '') continue;
+        foreach ($filtered_options as $i => $opt) {
             $db->insert('options', [
                 'question_id' => $id,
                 'option_text' => $opt,
-                'is_correct'  => ($i == $correct_option) ? '1' : '0'
+                'is_correct'  => ($i == $new_correct_index) ? '1' : '0'
             ]);
         }
 
@@ -96,18 +111,21 @@ include __DIR__ . '/../../../includes/admin_header.php';
                 </label>
                 <div class="space-y-3" id="options-container">
                     <?php foreach ($display_options as $i => $opt): ?>
-                    <div class="flex items-center gap-3">
+                    <div class="option-item flex items-center gap-3">
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="radio" name="correct_option" value="<?= $i ?>"
                                 <?= $correct_idx === $i ? 'checked' : '' ?>
                                 class="w-4 h-4 accent-purple-600">
                         </label>
-                        <span class="w-7 h-7 bg-gray-100 rounded-lg flex items-center justify-center text-xs font-bold text-gray-600 flex-shrink-0">
+                        <span class="option-label w-7 h-7 bg-gray-100 rounded-lg flex items-center justify-center text-xs font-bold text-gray-600 flex-shrink-0">
                             <?= chr(65 + $i) ?>
                         </span>
                         <input type="text" name="options[]" value="<?= h($opt) ?>"
                             class="flex-1 px-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
                             placeholder="<?= chr(65 + $i) ?> varianti">
+                        <button type="button" onclick="removeOption(this)" class="text-gray-400 hover:text-red-500 transition" title="Variantni o'chirish">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
                     <?php endforeach; ?>
                 </div>
@@ -132,23 +150,49 @@ include __DIR__ . '/../../../includes/admin_header.php';
 </div>
 
 <script>
-let optCount = <?= count($display_options) ?>;
+function updateLabelsAndValues() {
+    const container = document.getElementById('options-container');
+    const items = container.querySelectorAll('.option-item');
+    items.forEach((item, index) => {
+        const label = String.fromCharCode(65 + index);
+        item.querySelector('.option-label').innerText = label;
+        item.querySelector('input[type="text"]').placeholder = label + " varianti";
+        item.querySelector('input[type="radio"]').value = index;
+    });
+}
+
 function addOption() {
     const container = document.getElementById('options-container');
-    const label = String.fromCharCode(65 + optCount);
+    const optionCount = container.querySelectorAll('.option-item').length;
+    const label = String.fromCharCode(65 + optionCount);
+    
     const div = document.createElement('div');
-    div.className = 'flex items-center gap-3';
+    div.className = 'option-item flex items-center gap-3';
     div.innerHTML = `
         <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" name="correct_option" value="${optCount}" class="w-4 h-4 accent-purple-600">
+            <input type="radio" name="correct_option" value="${optionCount}" class="w-4 h-4 accent-purple-600">
         </label>
-        <span class="w-7 h-7 bg-gray-100 rounded-lg flex items-center justify-center text-xs font-bold text-gray-600 flex-shrink-0">${label}</span>
+        <span class="option-label w-7 h-7 bg-gray-100 rounded-lg flex items-center justify-center text-xs font-bold text-gray-600 flex-shrink-0">
+            ${label}
+        </span>
         <input type="text" name="options[]"
             class="flex-1 px-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
             placeholder="${label} varianti">
+        <button type="button" onclick="removeOption(this)" class="text-gray-400 hover:text-red-500 transition" title="Variantni o'chirish">
+            <i class="fas fa-times"></i>
+        </button>
     `;
     container.appendChild(div);
-    optCount++;
+}
+
+function removeOption(btn) {
+    const container = document.getElementById('options-container');
+    if (container.querySelectorAll('.option-item').length <= 2) {
+        alert("Kamida 2 ta variant qolishi kerak!");
+        return;
+    }
+    btn.closest('.option-item').remove();
+    updateLabelsAndValues();
 }
 </script>
 
