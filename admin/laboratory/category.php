@@ -34,6 +34,17 @@ $color = $cat['color'];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     
+    $upload_dirs = [
+        1 => 'laboratory_materials/yoriqnoma',
+        2 => 'laboratory_materials/imkoniyatlar',
+        3 => 'laboratory_materials/resurslar',
+        4 => 'laboratory_materials/maqola_yozish',
+        5 => 'laboratory_materials/platformalar',
+        6 => 'laboratory_materials/videolar'
+    ];
+    $base_upload_dir = isset($upload_dirs[$id]) ? $upload_dirs[$id] : 'laboratory_materials/other';
+    $full_upload_path = __DIR__ . '/../../uploads/' . $base_upload_dir;
+    
     if ($action === 'add') {
         $url = $_POST['url'] ?? '';
         $title = $_POST['title'] ?? '';
@@ -61,7 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         $file_path = '';
         $file_name = '';
-        $thumbnail = '';
         
         if (isset($_FILES['pdf']) && $_FILES['pdf']['error'] === UPLOAD_ERR_OK) {
             if ($_FILES['pdf']['size'] > 20 * 1024 * 1024) {
@@ -71,15 +81,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($ext !== 'pdf' && $ext !== 'png' && $ext !== 'jpg' && $ext !== 'jpeg') {
                 die_with_swal("Xato format", "Faqat PDF yoki rasm ruxsat etiladi!");
             }
-            $filename = uniqid() . '_' . basename($_FILES['pdf']['name']);
-            $target = __DIR__ . '/../../uploads/' . $filename;
             
-            if (!is_dir(__DIR__ . '/../../uploads')) {
-                mkdir(__DIR__ . '/../../uploads', 0777, true);
+            $filename = basename($_FILES['pdf']['name']);
+            $target = $full_upload_path . '/' . $filename;
+            
+            if (!is_dir($full_upload_path)) {
+                mkdir($full_upload_path, 0777, true);
             }
             
             if (move_uploaded_file($_FILES['pdf']['tmp_name'], $target)) {
-                $file_path = 'uploads/' . $filename;
+                $file_path = 'uploads/' . $base_upload_dir . '/' . $filename;
                 $file_name = $_FILES['pdf']['name'];
             }
         }
@@ -102,9 +113,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $description = trim($_POST['description'] ?? '');
         
         if ($id === 6 && !empty($url)) {
-            // Only update metadata if URL changed? Or just always update.
-            // Wait, if they just edit to update, fetching might overwrite their manual changes (if any).
-            // But they can't make manual changes since the fields are hidden.
             $html = fetch_remote_content($url);
             if ($html) {
                 if (preg_match('/<meta property="og:title" content="(.*?)"/s', $html, $matches)) {
@@ -138,11 +146,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($ext !== 'pdf' && $ext !== 'png' && $ext !== 'jpg' && $ext !== 'jpeg') {
                 die_with_swal("Xato format", "Faqat PDF yoki rasm ruxsat etiladi!");
             }
-            $filename = uniqid() . '_' . basename($_FILES['pdf']['name']);
-            $target = __DIR__ . '/../../uploads/' . $filename;
+            
+            $filename = basename($_FILES['pdf']['name']);
+            $target = $full_upload_path . '/' . $filename;
+            
+            if (!is_dir($full_upload_path)) {
+                mkdir($full_upload_path, 0777, true);
+            }
             
             if (move_uploaded_file($_FILES['pdf']['tmp_name'], $target)) {
-                $update_data['file_path'] = 'uploads/' . $filename;
+                // Delete old file
+                $old_item = $db->get_data_by_table('laboratory_materials', ['id' => $item_id]);
+                if ($old_item && !empty($old_item['file_path'])) {
+                    $old_file = __DIR__ . '/../../' . $old_item['file_path'];
+                    if (file_exists($old_file) && is_file($old_file)) {
+                        unlink($old_file);
+                    }
+                }
+                
+                $update_data['file_path'] = 'uploads/' . $base_upload_dir . '/' . $filename;
                 $update_data['file_name'] = $_FILES['pdf']['name'];
             }
         }
@@ -153,6 +175,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if ($action === 'delete') {
         $item_id = (int)$_POST['id'];
+        
+        // Delete the associated file
+        $old_item = $db->get_data_by_table('laboratory_materials', ['id' => $item_id]);
+        if ($old_item && !empty($old_item['file_path'])) {
+            $old_file = __DIR__ . '/../../' . $old_item['file_path'];
+            if (file_exists($old_file) && is_file($old_file)) {
+                unlink($old_file);
+            }
+        }
+        
         $db->delete('laboratory_materials', "id = $item_id");
         redirect('/admin/laboratory/category.php?id=' . $id);
     }
@@ -165,7 +197,12 @@ if ($search) {
     $s = $db->escape($search);
     $where .= " AND (title LIKE '%$s%' OR description LIKE '%$s%')";
 }
-$items = $db->get_data_by_table_all('laboratory_materials', "$where ORDER BY created_at DESC");
+if ($id === 5) {
+    $order = "ORDER BY CASE WHEN url IS NULL OR url = '' THEN 0 ELSE 1 END ASC, CASE WHEN url IS NULL OR url = '' THEN title ELSE created_at END ASC, created_at DESC";
+} else {
+    $order = "ORDER BY created_at DESC";
+}
+$items = $db->get_data_by_table_all('laboratory_materials', "$where $order");
 
 $page_title = $cat['name'];
 include __DIR__ . '/../../includes/admin_header.php';

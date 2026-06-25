@@ -37,7 +37,13 @@ if ($search) {
     $s = $db->escape($search);
     $where .= " AND (title LIKE '%$s%' OR description LIKE '%$s%')";
 }
-$items = $db->get_data_by_table_all('laboratory_materials', "$where ORDER BY created_at DESC");
+if ($id === 5) {
+    // For Demografik Saytlar (category 5), ensure PDFs are always first, sorted by their titles (1, 2, 3...)
+    $order = "ORDER BY CASE WHEN url IS NULL OR url = '' THEN 0 ELSE 1 END ASC, CASE WHEN url IS NULL OR url = '' THEN title ELSE created_at END ASC, created_at DESC";
+} else {
+    $order = "ORDER BY created_at DESC";
+}
+$items = $db->get_data_by_table_all('laboratory_materials', "$where $order");
 
 $page_title = $cat['name'];
 include __DIR__ . '/../../includes/user_header.php';

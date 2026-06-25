@@ -5,36 +5,28 @@ require_admin();
 $page_title = "Test qo'shish";
 $errors = [];
 
-// Load data for Select2
-$lectures_res = $db->query("SELECT id, title FROM lectures ORDER BY id ASC");
+$lectures_res = $db->query("SELECT id, title FROM lectures ORDER BY order_num ASC, id ASC");
 $lectures = [];
 if ($lectures_res) {
     while($row = mysqli_fetch_assoc($lectures_res)) $lectures[] = $row;
 }
 
-$practicals_res = $db->query("SELECT id, title FROM practicals ORDER BY id ASC");
-$practicals = [];
-if ($practicals_res) {
-    while($row = mysqli_fetch_assoc($practicals_res)) $practicals[] = $row;
-}
-
 $lectures_json = json_encode($lectures);
-$practicals_json = json_encode($practicals);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title           = trim($_POST['title'] ?? '');
     $description     = trim($_POST['description'] ?? '');
     $duration        = (int)($_POST['duration'] ?? 30);
-    $attempts_limit  = (int)($_POST['attempts_limit'] ?? 1);
-    $questions_limit = (int)($_POST['questions_limit'] ?? 20);
-    $module_type     = (int)($_POST['module_type'] ?? 0);
+    $attempts_limit  = (int)($_POST['attempts_limit'] ?? 3);
+    $questions_limit = (int)($_POST['questions_limit'] ?? 10);
+    $module_type     = 0; // Only Lectures
     $module_id       = (int)($_POST['module_id'] ?? 0);
 
     if (empty($title)) $errors[] = 'Sarlavha kiritilishi shart!';
     if ($duration < 1) $errors[] = 'Vaqt 1 daqiqadan kam bo\'lmasligi kerak!';
     if ($attempts_limit < 1) $errors[] = 'Urinishlar soni kamida 1 marta bo\'lishi kerak!';
     if ($questions_limit < 1) $errors[] = 'Savollar soni kamida 1 ta bo\'lishi kerak!';
-    if (empty($module_id)) $errors[] = 'Mavzu (Ma\'ruza yoki Amaliyot) tanlanishi shart!';
+    if (empty($module_id)) $errors[] = 'Ma\'ruza tanlanishi shart!';
 
     if (empty($errors)) {
         $id = $db->insert('tests', [
@@ -107,20 +99,9 @@ include __DIR__ . '/../../includes/admin_header.php';
         <form method="POST" class="space-y-5">
             
             <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 mb-2">
-                <label class="block text-sm font-medium text-gray-700 mb-3">Test qaysi bo'lim uchun?</label>
-                <div class="flex gap-6 mb-4">
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="module_type" value="0" <?= (isset($_POST['module_type']) && $_POST['module_type'] == '0') ? 'checked' : (empty($_POST) ? 'checked' : '') ?> class="w-4 h-4 accent-orange-500" onchange="updateModules()"> 
-                        <span class="text-sm font-medium text-gray-700">Ma'ruza</span>
-                    </label>
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="module_type" value="1" <?= (isset($_POST['module_type']) && $_POST['module_type'] == '1') ? 'checked' : '' ?> class="w-4 h-4 accent-orange-500" onchange="updateModules()"> 
-                        <span class="text-sm font-medium text-gray-700">Amaliyot</span>
-                    </label>
-                </div>
-                
+                <input type="hidden" name="module_type" value="0">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Mavzuni tanlang <span class="text-red-500">*</span></label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Ma'ruzani tanlang <span class="text-red-500">*</span></label>
                     <select name="module_id" id="module_id" class="w-full" required>
                         <option value="">Tanlang...</option>
                     </select>
@@ -158,7 +139,7 @@ include __DIR__ . '/../../includes/admin_header.php';
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">
                         Urinishlar soni
                     </label>
-                    <input type="number" name="attempts_limit" value="<?= (int)($_POST['attempts_limit'] ?? 1) ?>"
+                    <input type="number" name="attempts_limit" value="<?= (int)($_POST['attempts_limit'] ?? 3) ?>"
                         min="1" max="100"
                         class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent">
                 </div>
@@ -166,7 +147,7 @@ include __DIR__ . '/../../includes/admin_header.php';
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">
                         Ishlanadigan savollar soni
                     </label>
-                    <input type="number" name="questions_limit" value="<?= (int)($_POST['questions_limit'] ?? 20) ?>"
+                    <input type="number" name="questions_limit" value="<?= (int)($_POST['questions_limit'] ?? 10) ?>"
                         min="1" max="500"
                         class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent">
                 </div>
@@ -195,19 +176,15 @@ include __DIR__ . '/../../includes/admin_header.php';
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     const lectures = <?= $lectures_json ?>;
-    const practicals = <?= $practicals_json ?>;
     const selectedModuleId = <?= (int)($_POST['module_id'] ?? 0) ?>;
 
     function updateModules() {
-        const type = document.querySelector('input[name="module_type"]:checked').value;
         const select = $('#module_id');
         
         select.empty();
         select.append(new Option('Tanlang...', '', false, false));
         
-        const data = type === '0' ? lectures : practicals;
-        
-        data.forEach(item => {
+        lectures.forEach(item => {
             const isSelected = (parseInt(item.id) === selectedModuleId);
             const newOption = new Option(item.title, item.id, false, isSelected);
             select.append(newOption);

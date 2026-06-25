@@ -52,7 +52,7 @@ $yoriqnoma_link = $yoriqnoma_item && !empty($yoriqnoma_item['file_path']) ? BASE
                     <i class="fas fa-chart-bar text-2xl"></i>
                     <h3 class="text-xl font-bold tracking-wide">Laboratoriya</h3>
                 </div>
-                <h3 class="text-xl font-bold tracking-wide">Imkoniyatlari</h3>
+                <h3 class="text-xl font-bold tracking-wide">imkoniyatlari</h3>
             </div>
         </div>
         <div class="p-6 flex flex-col flex-grow text-center">
@@ -73,7 +73,7 @@ $yoriqnoma_link = $yoriqnoma_item && !empty($yoriqnoma_item['file_path']) ? BASE
             </div>
             <div class="relative z-10 flex items-center gap-3 text-white">
                 <i class="fas fa-book-open text-3xl"></i>
-                <h3 class="text-xl font-bold tracking-wide">Ilmiy Resurslar</h3>
+                <h3 class="text-xl font-bold tracking-wide">Ilmiy resurslar</h3>
             </div>
         </div>
         <div class="p-6 flex flex-col flex-grow text-center">
@@ -94,7 +94,7 @@ $yoriqnoma_link = $yoriqnoma_item && !empty($yoriqnoma_item['file_path']) ? BASE
             </div>
             <div class="relative z-10 flex items-center gap-3 text-white">
                 <i class="fas fa-pen-nib text-3xl"></i>
-                <h3 class="text-xl font-bold tracking-wide">Maqola Yozish Qoidalari</h3>
+                <h3 class="text-xl font-bold tracking-wide">Maqola yozish qoidalari</h3>
             </div>
         </div>
         <div class="p-6 flex flex-col flex-grow text-center">
@@ -115,7 +115,7 @@ $yoriqnoma_link = $yoriqnoma_item && !empty($yoriqnoma_item['file_path']) ? BASE
             </div>
             <div class="relative z-10 flex items-center gap-3 text-white">
                 <i class="fas fa-sitemap text-3xl"></i>
-                <h3 class="text-xl font-bold tracking-wide">Demografik Saytlar</h3>
+                <h3 class="text-xl font-bold tracking-wide">Demografik saytlar</h3>
             </div>
         </div>
         <div class="p-6 flex flex-col flex-grow text-center">
@@ -142,7 +142,7 @@ $yoriqnoma_link = $yoriqnoma_item && !empty($yoriqnoma_item['file_path']) ? BASE
             </div>
             <div class="relative z-10 flex items-center gap-3 text-white">
                 <i class="fab fa-youtube text-4xl"></i>
-                <h3 class="text-xl font-bold tracking-wide">Demografiya Videolar</h3>
+                <h3 class="text-xl font-bold tracking-wide">Demografiya videolar</h3>
             </div>
         </div>
         <div class="p-6 flex flex-col flex-grow text-center">

@@ -43,9 +43,7 @@ if ($progress_res) {
         }
     }
 }
-
-$is_unlocked = in_array((int)$practical['order_num'], $completed_lecture_orders);
-
+$is_unlocked = ((int)$practical['order_num'] === 0) || in_array((int)$practical['order_num'], $completed_lecture_orders);
 if (!$is_unlocked) {
     flash_message('error', "Bu amaliyot qulflangan! Dastlab unga tegishli bo'lgan ma'ruzani o'qib tugatishingiz kerak.");
     redirect('/user/practicals/index.php');

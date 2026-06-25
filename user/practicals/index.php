@@ -46,7 +46,11 @@ if ($p_progress_res) {
 foreach ($practicals as &$p) {
     $p['is_completed'] = in_array($p['id'], $completed_practicals);
     // Dastlab barchasi qulf bo'ladi. Agar shu tartib raqamidagi ma'ruza tugatilgan bo'lsa ochiladi.
-    $p['is_unlocked'] = in_array((int)$p['order_num'], $completed_lecture_orders);
+    if ((int)$p['order_num'] === 0) {
+        $p['is_unlocked'] = true;
+    } else {
+        $p['is_unlocked'] = in_array((int)$p['order_num'], $completed_lecture_orders);
+    }
 }
 unset($p);
 
