@@ -4,3 +4,4 @@ uploads/
 .DS_Store
 .codex
 .env
+database.sql

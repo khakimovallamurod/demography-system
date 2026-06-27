@@ -1,6 +1,6 @@
 <?php
 $chatbotEndpoint = app_url('/api/chat.php');
-$chatbotUser = $_SESSION['full_name'] ?? ($_SESSION['username'] ?? 'Foydalanuvchi');
+$chatbotUser = $_SESSION['full_name'] ?? ($_SESSION['phone'] ?? 'Foydalanuvchi');
 $chatbotRole = is_admin() ? 'admin' : 'user';
 ?>
 <div

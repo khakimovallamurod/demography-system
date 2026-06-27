@@ -10,7 +10,7 @@ if (!$test) {
     redirect('/user/tests/index.php');
 }
 
-$questions = $db->get_data_by_table_all('questions', "WHERE test_id = $test_id ORDER BY id ASC");
+$questions = $db->get_data_by_table_all('questions', "WHERE test_id = $test_id ORDER BY RAND() LIMIT " . $test['questions_limit']);
 if (empty($questions)) {
     flash_message('error', 'Testda savollar mavjud emas!');
     redirect('/user/tests/index.php');

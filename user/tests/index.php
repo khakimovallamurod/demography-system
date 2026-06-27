@@ -67,6 +67,7 @@ foreach ($all_attempts as $a) {
     <?php foreach ($tests as $t):
         $q_res = $db->query("SELECT COUNT(*) as cnt FROM questions WHERE test_id = {$t['id']}");
         $q_count = mysqli_fetch_assoc($q_res)['cnt'];
+        $display_q_count = min($q_count, $t['questions_limit']);
         $my_result = $my_result_map[$t['id']] ?? null;
         $percent = $my_result && $my_result['total'] > 0 ? round($my_result['score'] / $my_result['total'] * 100) : null;
         $attempts_made = $attempts_map[$t['id']] ?? 0;
@@ -121,7 +122,7 @@ foreach ($all_attempts as $a) {
             <div class="grid grid-cols-2 gap-3 mb-5 mt-auto">
                 <div class="bg-gray-50 rounded-xl p-3 flex flex-col items-center justify-center">
                     <i class="fas fa-question-circle text-orange-400 mb-1 text-lg"></i>
-                    <span class="text-xs text-gray-500 font-medium"><?= $q_count ?> savol</span>
+                    <span class="text-xs text-gray-500 font-medium"><?= $display_q_count ?> savol</span>
                 </div>
                 <div class="bg-gray-50 rounded-xl p-3 flex flex-col items-center justify-center">
                     <i class="fas fa-clock text-orange-400 mb-1 text-lg"></i>

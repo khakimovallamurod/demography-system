@@ -5,13 +5,30 @@ require_admin();
 $page_title = 'Foydalanuvchilar';
 $search = trim($_GET['q'] ?? '');
 $escapedSearch = $db->escape($search);
+$university_id = (int)($_GET['university_id'] ?? 0);
 
-$where = 'WHERE role = "user"';
+$where = 'WHERE u.role = "user"';
 if ($search !== '') {
-    $where .= " AND (full_name LIKE '%{$escapedSearch}%' OR username LIKE '%{$escapedSearch}%')";
+    $where .= " AND (u.full_name LIKE '%{$escapedSearch}%' OR u.phone LIKE '%{$escapedSearch}%')";
+}
+if ($university_id > 0) {
+    $where .= " AND u.university_id = $university_id";
 }
 
-$users = $db->get_data_by_table_all('users', "{$where} ORDER BY created_at DESC");
+$query = "SELECT u.*, un.name as university_name 
+          FROM users u 
+          LEFT JOIN universities un ON u.university_id = un.id 
+          {$where} 
+          ORDER BY u.created_at DESC";
+$res = $db->query($query);
+$users = [];
+if ($res) {
+    while ($r = mysqli_fetch_assoc($res)) {
+        $users[] = $r;
+    }
+}
+
+$universities = $db->get_data_by_table_all('universities', 'ORDER BY name ASC');
 
 $resultsByUser = [];
 $statsQuery = $db->query("
@@ -44,21 +61,29 @@ include __DIR__ . '/../../includes/admin_header.php';
         </div>
 
         <form method="GET" class="w-full lg:w-auto">
-            <div class="flex flex-col sm:flex-row gap-3">
+            <div class="flex flex-col sm:flex-row gap-3 items-center">
+                <select name="university_id" class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-300">
+                    <option value="">Barcha OTMlar</option>
+                    <?php foreach ($universities as $u): ?>
+                    <option value="<?= $u['id'] ?>" <?= $university_id == $u['id'] ? 'selected' : '' ?>>
+                        <?= h($u['name']) ?>
+                    </option>
+                    <?php endforeach; ?>
+                </select>
                 <div class="relative min-w-[280px]">
                     <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
                     <input
                         type="text"
                         name="q"
                         value="<?= h($search) ?>"
-                        placeholder="Ism yoki username bo‘yicha qidirish"
+                        placeholder="Ism yoki telefon raqam bo'yicha qidirish"
                         class="w-full rounded-xl border border-gray-200 bg-gray-50 pl-10 pr-4 py-2.5 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-300"
                     >
                 </div>
                 <button type="submit" class="inline-flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition">
                     <i class="fas fa-filter text-xs"></i> Filter
                 </button>
-                <?php if ($search !== ''): ?>
+                <?php if ($search !== '' || $university_id > 0): ?>
                 <a href="<?= BASE_URL ?>/admin/users/index.php" class="inline-flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium px-4 py-2.5 rounded-xl transition">
                     <i class="fas fa-rotate-left text-xs"></i> Tozalash
                 </a>
@@ -81,8 +106,8 @@ include __DIR__ . '/../../includes/admin_header.php';
                 <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
                     <th class="text-left px-5 py-3">#</th>
                     <th class="text-left px-5 py-3">F.I.SH</th>
-                    <th class="text-left px-5 py-3">Username</th>
-                    <th class="text-left px-5 py-3">Rol</th>
+                    <th class="text-left px-5 py-3">Telefon raqam</th>
+                    <th class="text-left px-5 py-3">OTM</th>
                     <th class="text-left px-5 py-3">Test urinishlari</th>
                     <th class="text-left px-5 py-3">Oxirgi natija</th>
                     <th class="text-left px-5 py-3">Ro'yxatdan o'tgan</th>
@@ -101,11 +126,15 @@ include __DIR__ . '/../../includes/admin_header.php';
                             <div class="font-medium text-gray-800"><?= h($user['full_name']) ?></div>
                         </div>
                     </td>
-                    <td class="px-5 py-3.5 text-gray-600">@<?= h($user['username']) ?></td>
-                    <td class="px-5 py-3.5">
-                        <span class="inline-flex items-center rounded-full bg-purple-50 text-purple-600 px-2.5 py-1 text-xs font-medium">user</span>
+                    <td class="px-5 py-3.5 text-gray-600"><?= h($user['phone']) ?></td>
+                    <td class="px-5 py-3.5 text-gray-600 text-xs">
+                        <?= h($user['university_name'] ?? 'Kiritilmagan') ?>
                     </td>
-                    <td class="px-5 py-3.5 text-gray-700"><?= (int) ($userStats['attempts'] ?? 0) ?></td>
+                    <td class="px-5 py-3.5">
+                        <span class="inline-flex items-center rounded-full bg-purple-50 text-purple-600 px-2.5 py-1 text-xs font-medium">
+                            <?= $userStats ? (int)$userStats['attempts'] . ' marta' : 'Yo\'q' ?>
+                        </span>
+                    </td>
                     <td class="px-5 py-3.5 text-gray-500 text-xs">
                         <?= !empty($userStats['last_completed_at']) ? date('d.m.Y H:i', strtotime($userStats['last_completed_at'])) : '—' ?>
                     </td>

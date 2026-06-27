@@ -16,7 +16,7 @@ $lectures_json = json_encode($lectures);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title           = trim($_POST['title'] ?? '');
     $description     = trim($_POST['description'] ?? '');
-    $duration        = (int)($_POST['duration'] ?? 30);
+    $duration        = (int)($_POST['duration'] ?? 15);
     $attempts_limit  = (int)($_POST['attempts_limit'] ?? 3);
     $questions_limit = (int)($_POST['questions_limit'] ?? 10);
     $module_type     = 0; // Only Lectures
@@ -127,7 +127,7 @@ include __DIR__ . '/../../includes/admin_header.php';
                     Davomiyligi <span class="text-gray-400 text-xs">(daqiqada)</span>
                 </label>
                 <div class="flex items-center gap-3">
-                    <input type="number" name="duration" value="<?= (int)($_POST['duration'] ?? 30) ?>"
+                    <input type="number" name="duration" value="<?= (int)($_POST['duration'] ?? 15) ?>"
                         min="1" max="180"
                         class="w-28 px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent">
                     <span class="text-sm text-gray-500">daqiqa</span>

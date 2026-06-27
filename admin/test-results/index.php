@@ -11,7 +11,7 @@ $tests = $db->get_data_by_table_all('tests', 'ORDER BY title ASC');
 
 $whereParts = ['tr.completed_at IS NOT NULL'];
 if ($search !== '') {
-    $whereParts[] = "(t.title LIKE '%{$escapedSearch}%' OR u.full_name LIKE '%{$escapedSearch}%' OR u.username LIKE '%{$escapedSearch}%')";
+    $whereParts[] = "(t.title LIKE '%{$escapedSearch}%' OR u.full_name LIKE '%{$escapedSearch}%' OR u.phone LIKE '%{$escapedSearch}%')";
 }
 if ($selectedTestId > 0) {
     $whereParts[] = 'tr.test_id = ' . $selectedTestId;
@@ -27,7 +27,7 @@ $query = $db->query("
         tr.started_at,
         tr.completed_at,
         u.full_name,
-        u.username,
+        u.phone,
         t.id AS test_id,
         t.title AS test_title,
         t.duration
@@ -121,7 +121,7 @@ include __DIR__ . '/../../includes/admin_header.php';
                     <td class="px-5 py-3.5 text-gray-400"><?= $index + 1 ?></td>
                     <td class="px-5 py-3.5">
                         <div class="font-medium text-gray-800"><?= h($result['full_name']) ?></div>
-                        <div class="text-xs text-gray-400 mt-0.5">@<?= h($result['username']) ?></div>
+                        <div class="text-xs text-gray-400 mt-0.5"><?= h($result['phone']) ?></div>
                     </td>
                     <td class="px-5 py-3.5 text-gray-700 min-w-[240px]"><?= h($result['test_title']) ?></td>
                     <td class="px-5 py-3.5 text-gray-700 font-medium"><?= (int) $result['score'] ?> / <?= (int) $result['total'] ?></td>

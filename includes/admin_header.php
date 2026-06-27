@@ -47,9 +47,7 @@
     <!-- Logo -->
     <div class="p-4 border-b border-white/10 flex-shrink-0">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-white/15 rounded-xl flex items-center justify-center flex-shrink-0">
-                <i class="fas fa-globe text-white text-lg"></i>
-            </div>
+            <img src="<?= SITE_LOGO ?>" alt="Logo" class="w-14 h-14 object-contain flex-shrink-0" onerror="this.style.display='none'">
             <div class="min-w-0">
                 <h1 class="font-bold text-white text-xs leading-tight break-words"><?= SITE_NAME ?></h1>
                 <p class="text-slate-400 text-xs mt-0.5">Admin Panel</p>
@@ -144,11 +142,25 @@
             <span>Biz haqimizda</span>
         </a>
 
-        <a href="#"
-           class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm">
-            <i class="nav-icon fas fa-cog w-4 text-center"></i>
-            <span>Sozlamalar</span>
-        </a>
+        <!-- Sozlamalar menu with submenu -->
+        <div>
+            <button type="button" onclick="document.getElementById('settings-submenu').classList.toggle('hidden')"
+               class="nav-link w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm <?= (strpos($_SERVER['REQUEST_URI'], '/admin/settings/') !== false) ? 'active' : '' ?>">
+                <div class="flex items-center gap-3">
+                    <i class="nav-icon fas fa-cog w-4 text-center"></i>
+                    <span>Sozlamalar</span>
+                </div>
+                <i class="fas fa-chevron-down text-xs text-gray-400"></i>
+            </button>
+            <div id="settings-submenu" class="pl-10 pr-3 py-2 space-y-1 <?= (strpos($_SERVER['REQUEST_URI'], '/admin/settings/') !== false) ? '' : 'hidden' ?>">
+                <a href="<?= BASE_URL ?>/admin/settings/universities/index.php" class="block py-1.5 text-sm text-gray-300 hover:text-white transition-colors <?= (strpos($_SERVER['REQUEST_URI'], '/admin/settings/universities/') !== false) ? 'text-white font-semibold' : '' ?>">
+                    OTMlar
+                </a>
+                <a href="<?= BASE_URL ?>/admin/settings/teachers/index.php" class="block py-1.5 text-sm text-gray-300 hover:text-white transition-colors <?= (strpos($_SERVER['REQUEST_URI'], '/admin/settings/teachers/') !== false) ? 'text-white font-semibold' : '' ?>">
+                    O'qituvchilar
+                </a>
+            </div>
+        </div>
 
         <div class="pt-3 mt-2 border-t border-white/10">
             <a href="<?= BASE_URL ?>/logout.php"
@@ -174,7 +186,7 @@
                     <i class="fas fa-bars"></i>
                 </button>
                 <div class="hidden md:flex items-center gap-2">
-                    <i class="fas fa-globe text-blue-600 text-lg"></i>
+                    <img src="<?= SITE_LOGO ?>" alt="Logo" class="w-6 h-6 object-contain" onerror="this.style.display='none'">
                     <span class="font-semibold text-gray-700 text-sm"><?= SITE_NAME ?></span>
                 </div>
             </div>

@@ -165,7 +165,7 @@ class Database {
 }
 
 // App settings
-define('SITE_NAME', 'Demografiya Tizimi');
+define('SITE_NAME', 'Geodemografiya Tizimi');
 define('BASE_URL', '/demography-system');
 define('UPLOAD_PATH', __DIR__ . '/../uploads/');
 define('SITE_LOGO', BASE_URL . '/assets/images/logo.png');

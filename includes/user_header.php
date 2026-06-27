@@ -9,24 +9,23 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         .nav-link {
-            transition: all 0.18s;
-            border-left: 3px solid transparent;
-            color: #cbd5e1;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            color: rgba(255, 255, 255, 0.65);
         }
         .nav-link:hover {
-            background: rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.08);
             color: #fff;
-            border-left-color: rgba(255,255,255,0.4);
+            transform: translateX(4px);
         }
         .nav-link.active {
-            background: rgba(255,255,255,0.18);
+            background: linear-gradient(90deg, rgba(56,189,248,0.15) 0%, rgba(56,189,248,0.05) 100%);
             color: #fff;
-            border-left-color: #86efac;
+            border-left: 3px solid #38bdf8;
             font-weight: 600;
         }
-        .nav-link .nav-icon { color: #4ade80; transition: color 0.18s; }
+        .nav-link .nav-icon { color: rgba(255, 255, 255, 0.65); transition: color 0.2s; }
         .nav-link:hover .nav-icon,
-        .nav-link.active .nav-icon { color: #86efac; }
+        .nav-link.active .nav-icon { color: #38bdf8; }
 
         .card-hover { transition: transform 0.18s, box-shadow 0.18s; }
         .card-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
@@ -42,19 +41,17 @@
 
 <!-- Sidebar — dark, same as admin -->
 <aside id="sidebar"
-       class="fixed top-0 left-0 h-full w-64 z-50
+       class="fixed top-0 left-0 h-full w-64 z-50 shadow-2xl
               transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex flex-col"
-       style="background: linear-gradient(180deg, #052e16 0%, #166534 100%);">
+       style="background: #0f172a;">
 
     <!-- Logo -->
     <div class="p-4 border-b border-white/10 flex-shrink-0">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-white/15 rounded-xl flex items-center justify-center flex-shrink-0">
-                <i class="fas fa-globe text-white text-lg"></i>
-            </div>
+            <img src="<?= SITE_LOGO ?>" alt="Logo" class="w-14 h-14 object-contain flex-shrink-0" onerror="this.style.display='none'">
             <div class="min-w-0">
                 <h1 class="font-bold text-white text-xs leading-tight break-words"><?= SITE_NAME ?></h1>
-                <p class="text-green-300 text-xs mt-0.5">Talaba kabineti</p>
+                <p class="text-[#38bdf8] font-medium text-xs mt-0.5 tracking-wide uppercase">Talaba kabineti</p>
             </div>
         </div>
     </div>
@@ -168,7 +165,7 @@
                     <i class="fas fa-bars"></i>
                 </button>
                 <div class="hidden md:flex items-center gap-2">
-                    <i class="fas fa-globe text-blue-600 text-lg"></i>
+                    <img src="<?= SITE_LOGO ?>" alt="Logo" class="w-6 h-6 object-contain" onerror="this.style.display='none'">
                     <span class="font-semibold text-gray-700 text-sm"><?= SITE_NAME ?></span>
                 </div>
             </div>

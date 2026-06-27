@@ -10,7 +10,7 @@ $categories = [
     3 => ['name' => "Ilmiy Resurslar", 'desc' => "Maqolalar va manbalar", 'color' => 'blue', 'icon' => 'fa-book-open'],
     4 => ['name' => "Maqola Yozish Qoidalari", 'desc' => "Ilmiy maqola tuzilishi (IMRAD va h.k.)", 'color' => 'amber', 'icon' => 'fa-pen-nib'],
     5 => ['name' => "Demografik Saytlar", 'desc' => "Milliy va xalqaro demografik platformalar", 'color' => 'slate', 'icon' => 'fa-globe'],
-    6 => ['name' => "Demografiya Videolar", 'desc' => "Ta’limiy videolar.", 'color' => 'red', 'icon' => 'fa-play']
+    6 => ['name' => "Geodemografiya Videolar", 'desc' => "Ta’limiy videolar.", 'color' => 'red', 'icon' => 'fa-play']
 ];
 
 // Nomi bazadan olinadi (agar o'zgartirilsa, avtomatik moslashadi)
@@ -199,6 +199,8 @@ if ($search) {
 }
 if ($id === 5) {
     $order = "ORDER BY CASE WHEN url IS NULL OR url = '' THEN 0 ELSE 1 END ASC, CASE WHEN url IS NULL OR url = '' THEN title ELSE created_at END ASC, created_at DESC";
+} else if ($id === 2) {
+    $order = "ORDER BY CAST(title AS UNSIGNED) ASC, title ASC";
 } else {
     $order = "ORDER BY created_at DESC";
 }
@@ -304,25 +306,48 @@ include __DIR__ . '/../../includes/admin_header.php';
                 <?php endif; ?>
             <?php endif; ?>
         <?php else: ?>
-        <div class="aspect-[1/1.4] bg-gray-100 relative flex items-center justify-center border-b border-gray-100 overflow-hidden shrink-0">
-            <canvas class="pdf-thumbnail absolute inset-0 w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 z-10" data-pdf-url="<?= BASE_URL ?>/<?= h($item['file_path']) ?>"></canvas>
-            <div class="pdf-thumbnail-loader absolute inset-0 flex items-center justify-center bg-gray-50 z-0">
-                <i class="fas fa-file-pdf text-6xl text-gray-300"></i>
-            </div>
-            <div class="absolute top-3 right-3 bg-white/80 backdrop-blur px-2.5 py-1 rounded-full text-xs font-bold text-gray-700 shadow-sm flex items-center gap-1.5 z-20">
-                <i class="fas fa-eye text-<?= $color ?>-500"></i> <?= $item['views'] ?>
-            </div>
-        </div>
-        <div class="p-5 flex-1 flex flex-col">
-            <h3 class="font-bold text-gray-800 text-sm mb-1 line-clamp-2"><?= h(stripslashes($item['title'])) ?></h3>
-            <div class="text-[11px] text-gray-400 mb-3 flex items-center gap-1.5 font-medium">
-                <i class="far fa-calendar-alt"></i> <?= date('d.m.Y', strtotime($item['created_at'])) ?>
-            </div>
-            
-            <?php if (!empty($item['description'])): ?>
-                <div class="text-xs leading-relaxed text-gray-600 mb-4 overflow-y-auto custom-scrollbar pr-2 flex-1 max-h-12 line-clamp-2">
-                    <?= nl2br(h($item['description'])) ?>
+            <?php if ($id === 2): ?>
+                <div class="p-5 flex-1 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-start justify-between gap-4 mb-4">
+                            <div class="w-12 h-12 rounded-xl bg-<?= $color ?>-50 text-<?= $color ?>-500 flex items-center justify-center shrink-0">
+                                <i class="fas <?= $cat['icon'] ?> text-xl"></i>
+                            </div>
+                            <div class="bg-gray-50 px-2.5 py-1 rounded-md text-[10px] font-bold text-gray-500 flex items-center gap-1.5 shrink-0">
+                                <i class="fas fa-eye text-gray-400"></i> <?= $item['views'] ?>
+                            </div>
+                        </div>
+                        <h3 class="font-bold text-gray-800 text-sm mb-2 leading-snug"><?= h(stripslashes($item['title'])) ?></h3>
+                        <div class="text-[11px] text-gray-400 flex items-center gap-1.5 font-medium">
+                            <i class="far fa-calendar-alt"></i> <?= date('d.m.Y', strtotime($item['created_at'])) ?>
+                        </div>
+                        <?php if (!empty($item['description'])): ?>
+                            <div class="text-xs leading-relaxed text-gray-600 mt-3 line-clamp-2">
+                                <?= nl2br(h($item['description'])) ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+            <?php else: ?>
+                <div class="aspect-[1/1.4] bg-gray-100 relative flex items-center justify-center border-b border-gray-100 overflow-hidden shrink-0">
+                    <canvas class="pdf-thumbnail absolute inset-0 w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 z-10" data-pdf-url="<?= BASE_URL ?>/<?= h($item['file_path']) ?>"></canvas>
+                    <div class="pdf-thumbnail-loader absolute inset-0 flex items-center justify-center bg-gray-50 z-0">
+                        <i class="fas fa-file-pdf text-6xl text-gray-300"></i>
+                    </div>
+                    <div class="absolute top-3 right-3 bg-white/80 backdrop-blur px-2.5 py-1 rounded-full text-xs font-bold text-gray-700 shadow-sm flex items-center gap-1.5 z-20">
+                        <i class="fas fa-eye text-<?= $color ?>-500"></i> <?= $item['views'] ?>
+                    </div>
                 </div>
+                <div class="p-5 flex-1 flex flex-col">
+                    <h3 class="font-bold text-gray-800 text-sm mb-1 line-clamp-2"><?= h(stripslashes($item['title'])) ?></h3>
+                    <div class="text-[11px] text-gray-400 mb-3 flex items-center gap-1.5 font-medium">
+                        <i class="far fa-calendar-alt"></i> <?= date('d.m.Y', strtotime($item['created_at'])) ?>
+                    </div>
+                    
+                    <?php if (!empty($item['description'])): ?>
+                        <div class="text-xs leading-relaxed text-gray-600 mb-4 overflow-y-auto custom-scrollbar pr-2 flex-1 max-h-12 line-clamp-2">
+                            <?= nl2br(h($item['description'])) ?>
+                        </div>
+                    <?php endif; ?>
             <?php endif; ?>
         <?php endif; ?>
             

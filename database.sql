@@ -7,11 +7,13 @@ USE demographydb;
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    university_id INT DEFAULT NULL,
     full_name VARCHAR(100) NOT NULL,
-    username VARCHAR(50) NOT NULL UNIQUE,
+    phone VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    role ENUM('admin', 'user') DEFAULT 'user',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    role ENUM('admin', 'user', 'teacher') DEFAULT 'user',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (university_id) REFERENCES universities(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Lectures table
@@ -100,9 +102,9 @@ INSERT INTO users (full_name, username, password, role) VALUES
 
 -- Sample lectures
 INSERT INTO lectures (title, description, content) VALUES
-('Demografiya asoslari', 'Demografiya faniga kirish', 'Demografiya — aholini o''rganuvchi fan bo''lib, u aholi sonini, tarkibini, joylanishini va harakatini o''rganadi. Bu fan statistika va ijtimoiy fanlar bilan chambarchas bog''liq.'),
+('Geodemografiya asoslari', 'Geodemografiya faniga kirish', 'Geodemografiya — aholini o''rganuvchi fan bo''lib, u aholi sonini, tarkibini, joylanishini va harakatini o''rganadi. Bu fan statistika va ijtimoiy fanlar bilan chambarchas bog''liq.'),
 ('Aholi o''sish nazariyalari', 'Malthus va zamonaviy nazariyalar', 'Tomas Malthus aholi geometrik progressiyada o''sishini, oziq-ovqat esa arifmetik progressiyada o''sishini ta''kidlagan. Zamonaviy demograflar bu nazariyani yanada rivojlantirgan.'),
-('O''zbekiston demografiyasi', 'O''zbekiston aholi tahlili', 'O''zbekiston — Markaziy Osiyoning eng ko''p aholli davlati. 2024-yilga kelib aholi soni 37 million kishidan oshgan.');
+('O''zbekiston geodemografiyasi', 'O''zbekiston aholi tahlili', 'O''zbekiston — Markaziy Osiyoning eng ko''p aholli davlati. 2024-yilga kelib aholi soni 37 million kishidan oshgan.');
 
 -- Sample practicals
 INSERT INTO practicals (title, description, content) VALUES
@@ -111,10 +113,10 @@ INSERT INTO practicals (title, description, content) VALUES
 
 -- Sample test
 INSERT INTO tests (title, description, duration) VALUES
-('Demografiya asoslari testi', 'Demografiya fanining asosiy tushunchalarini tekshirish', 20);
+('Geodemografiya asoslari testi', 'Geodemografiya fanining asosiy tushunchalarini tekshirish', 20);
 
 INSERT INTO questions (test_id, question_text) VALUES
-(1, 'Demografiya nima?'),
+(1, 'Geodemografiya nima?'),
 (1, 'O''zbekiston aholisi 2024-yilda necha million kishini tashkil etdi?'),
 (1, 'Malthus qaysi asarda aholi nazariyasini bayon etgan?');
 
@@ -179,3 +181,29 @@ CREATE TABLE IF NOT EXISTS laboratory_materials (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS universities (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS teachers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    university_id INT NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    phone VARCHAR(50) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (university_id) REFERENCES universities(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- Universities table
+CREATE TABLE IF NOT EXISTS universities (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+

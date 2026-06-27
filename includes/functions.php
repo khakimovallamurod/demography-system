@@ -54,8 +54,23 @@ function require_admin() {
 
 function require_user() {
     require_login();
-    if (is_admin()) {
-        redirect('/admin/dashboard.php');
+    if ($_SESSION['role'] !== 'user') {
+        if (is_admin()) redirect('/admin/dashboard.php');
+        if (is_teacher()) redirect('/teacher/dashboard.php');
+        redirect('/');
+    }
+}
+
+function is_teacher() {
+    return isset($_SESSION['role']) && $_SESSION['role'] === 'teacher';
+}
+
+function require_teacher() {
+    require_login();
+    if (!is_teacher()) {
+        if (is_admin()) redirect('/admin/dashboard.php');
+        if (isset($_SESSION['role']) && $_SESSION['role'] === 'user') redirect('/user/dashboard.php');
+        redirect('/');
     }
 }
 
@@ -403,7 +418,7 @@ function get_student_performance_summary() {
         SELECT
             u.id,
             u.full_name,
-            u.username,
+            u.phone,
             COUNT(tr.id) AS attempts,
             COALESCE(AVG(CASE WHEN tr.total > 0 THEN (tr.score / tr.total) * 100 END), 0) AS avg_percent,
             COALESCE(MAX(tr.completed_at), u.created_at) AS last_activity
@@ -411,7 +426,7 @@ function get_student_performance_summary() {
         LEFT JOIN test_results tr
             ON tr.user_id = u.id AND tr.completed_at IS NOT NULL
         WHERE u.role = 'user'
-        GROUP BY u.id, u.full_name, u.username, u.created_at
+        GROUP BY u.id, u.full_name, u.phone, u.created_at
         ORDER BY avg_percent DESC, attempts DESC, u.full_name ASC
     ");
 
@@ -520,11 +535,11 @@ function parse_stat_uz_resource($html) {
     ];
 }
 
-function parse_demografiya_resource($html) {
+function parse_geodemografiya_resource($html) {
     $mainBlock = 'Doimiy aholi soni';
     $passportBlock = 'Demografik passport';
     $articleTitle = 'Demografik tahliliy materiallar';
-    $articleCategory = 'Demografiya portali';
+    $articleCategory = 'Geodemografiya portali';
 
     if (preg_match('/<div class="title">(.*?)<\/div>/su', $html, $matches)) {
         $mainBlock = normalize_space($matches[1]);
@@ -540,10 +555,10 @@ function parse_demografiya_resource($html) {
     }
 
     return [
-        'site_key' => 'demografiya',
-        'site_name' => 'demografiya.uz',
-        'url' => 'https://demografiya.uz/uz/',
-        'title' => 'Demografiya portali',
+        'site_key' => 'geodemografiya',
+        'site_name' => 'geodemografiya.uz',
+        'url' => 'https://geodemografiya.uz/uz/',
+        'title' => 'Geodemografiya portali',
         'summary' => 'Portalning asosiy bo‘limlari va dolzarb tahliliy materiallari.',
         'items' => [
             [
@@ -578,14 +593,14 @@ function parse_demografiya_resource($html) {
 function get_dashboard_external_resources() {
     $resources = [];
 
-    $resources[] = get_cached_external_data('dashboard_demografiya', function () {
-        $html = fetch_remote_content('https://demografiya.uz/uz/');
+    $resources[] = get_cached_external_data('dashboard_geodemografiya', function () {
+        $html = fetch_remote_content('https://geodemografiya.uz/uz/');
         if (!$html) {
             return [
-                'site_key' => 'demografiya',
-                'site_name' => 'demografiya.uz',
-                'url' => 'https://demografiya.uz/uz/',
-                'title' => 'Demografiya portali',
+                'site_key' => 'geodemografiya',
+                'site_name' => 'geodemografiya.uz',
+                'url' => 'https://geodemografiya.uz/uz/',
+                'title' => 'Geodemografiya portali',
                 'summary' => 'Portal bilan aloqa o‘rnatilmadi, ammo batafsil sahifani ochish mumkin.',
                 'items' => [
                     ['label' => 'Holat', 'value' => 'Ma`lumot vaqtincha olinmadi', 'note' => 'Tarmoq yoki masofaviy server javobi kerak'],
@@ -603,7 +618,7 @@ function get_dashboard_external_resources() {
             ];
         }
 
-        return parse_demografiya_resource($html);
+        return parse_geodemografiya_resource($html);
     });
 
     $resources[] = get_cached_external_data('dashboard_stat_uz', function () {
@@ -661,7 +676,7 @@ function get_dashboard_external_resources() {
         'site_name' => 'demographic-calculator.vercel.app',
         'url' => 'https://demographic-calculator.vercel.app/',
         'title' => 'Demographic Calculator',
-        'summary' => 'Aholi demografiyasi, o\'sish sur\'atlari va prognozlarni hisoblash uchun maxsus vosita.',
+        'summary' => 'Aholi geodemografiyasi, o\'sish sur\'atlari va prognozlarni hisoblash uchun maxsus vosita.',
         'items' => [
             ['label' => 'Turi', 'value' => 'Hisoblash vositasi', 'note' => 'Web ilova'],
             ['label' => 'Yo\'nalish', 'value' => 'Tahlil va Prognoz', 'note' => 'Demografik modellar'],
@@ -680,3 +695,41 @@ function get_dashboard_external_resources() {
 
     return array_values(array_filter($resources, 'is_array'));
 }
+
+function log_user_activity() {
+    global $db;
+    if (!is_logged_in() || !isset($_SESSION['role']) || $_SESSION['role'] !== 'user') {
+        return;
+    }
+
+    $user_id = (int)$_SESSION['user_id'];
+    $date = date('Y-m-d');
+    $now = time();
+
+    // Check if this is a new visit (no activity for 30 mins)
+    if (!isset($_SESSION['last_activity_time']) || ($now - $_SESSION['last_activity_time']) > 1800) {
+        $db->query("INSERT INTO user_activity (user_id, date, visits_count, total_minutes) 
+                    VALUES ($user_id, '$date', 1, 0) 
+                    ON DUPLICATE KEY UPDATE visits_count = visits_count + 1");
+        $_SESSION['session_accumulated_seconds'] = 0;
+    } else {
+        $delta = $now - $_SESSION['last_activity_time'];
+        if (!isset($_SESSION['session_accumulated_seconds'])) {
+            $_SESSION['session_accumulated_seconds'] = 0;
+        }
+        $_SESSION['session_accumulated_seconds'] += $delta;
+
+        $minutes_to_add = floor($_SESSION['session_accumulated_seconds'] / 60);
+        if ($minutes_to_add > 0) {
+            $db->query("INSERT INTO user_activity (user_id, date, visits_count, total_minutes) 
+                        VALUES ($user_id, '$date', 1, $minutes_to_add) 
+                        ON DUPLICATE KEY UPDATE total_minutes = total_minutes + $minutes_to_add");
+            $_SESSION['session_accumulated_seconds'] -= ($minutes_to_add * 60);
+        }
+    }
+    
+    $_SESSION['last_activity_time'] = $now;
+}
+
+// Track user activity on every page load
+log_user_activity();

@@ -43,42 +43,7 @@ $viewerTheme = $accentMap[$pdfViewerAccent] ?? $accentMap['blue'];
     data-pdf-url="<?= h($pdfViewerUrl) ?>"
     class="bg-white rounded-[28px] border border-gray-200 shadow-[0_20px_60px_rgba(15,23,42,0.08)] overflow-hidden"
 >
-    <div class="bg-gradient-to-r <?= h($viewerTheme['panel']) ?> px-4 py-4 sm:px-5">
-        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div class="min-w-0">
-                <div class="flex items-center gap-2 text-white/80 text-xs uppercase tracking-[0.28em]">
-                    <i class="fas fa-file-pdf text-red-300"></i>
-                    Interactive Viewer
-                </div>
-                <h3 class="text-white font-semibold text-base sm:text-lg truncate mt-1"><?= h($pdfViewerTitle) ?></h3>
-                <p class="text-white/60 text-xs sm:text-sm mt-1">Zoom, scroll, touch va sahifa boshqaruvi qo‘llab-quvvatlanadi.</p>
-            </div>
 
-            <div class="flex flex-wrap items-center gap-2">
-                <span class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold <?= h($viewerTheme['badge']) ?>">
-                    <span class="w-2 h-2 rounded-full bg-current opacity-70"></span>
-                    <span data-loading-text>Yuklanmoqda...</span>
-                </span>
-                <a
-                    href="<?= h($pdfViewerUrl) ?>"
-                    target="_blank"
-                    rel="noopener"
-                    class="inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-medium transition focus:outline-none focus:ring-4 <?= h($viewerTheme['buttonSoft']) ?>"
-                >
-                    <i class="fas fa-up-right-from-square text-xs"></i>
-                    <?= h($pdfViewerOpenLabel) ?>
-                </a>
-                <a
-                    href="<?= h($pdfViewerDownloadUrl) ?>"
-                    download
-                    class="inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-medium text-white transition focus:outline-none focus:ring-4 <?= h($viewerTheme['button']) ?>"
-                >
-                    <i class="fas fa-download text-xs"></i>
-                    <?= h($pdfViewerDownloadLabel) ?>
-                </a>
-            </div>
-        </div>
-    </div>
 
     <div class="border-b border-gray-200 bg-gray-50/80 px-3 py-3 sm:px-4">
         <div class="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
@@ -191,8 +156,8 @@ if (container) {
     };
 
     const setLoading = (loading, text = 'Yuklanmoqda...') => {
-        loadingOverlay.classList.toggle('hidden', !loading);
-        loadingText.textContent = text;
+        if (loadingOverlay) loadingOverlay.classList.toggle('hidden', !loading);
+        if (loadingText) loadingText.textContent = text;
     };
 
     const setError = (show) => {
@@ -380,7 +345,7 @@ if (container) {
             console.error('PDF load error:', error);
             setLoading(false);
             setError(true);
-            loadingText.textContent = 'Yuklashda xatolik';
+            if (loadingText) loadingText.textContent = 'Yuklashda xatolik';
         }
     };
 

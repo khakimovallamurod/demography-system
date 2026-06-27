@@ -13,7 +13,7 @@ $external_resources = get_dashboard_external_resources();
 $all_test_results = [];
 $resultsQuery = $db->query("
     SELECT tr.id, tr.score, tr.total, tr.completed_at,
-           u.full_name, u.username, t.title AS test_title
+           u.full_name, u.phone, t.title AS test_title
     FROM test_results tr
     INNER JOIN users u ON u.id = tr.user_id
     INNER JOIN tests t ON t.id = tr.test_id

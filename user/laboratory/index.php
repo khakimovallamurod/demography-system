@@ -124,7 +124,7 @@ $yoriqnoma_link = $yoriqnoma_item && !empty($yoriqnoma_item['file_path']) ? BASE
                 <span class="text-[10px] font-bold bg-blue-600 text-white px-2 py-1 rounded">STAT.UZ</span>
                 <span class="text-[10px] font-bold bg-slate-700 text-white px-2 py-1 rounded">SIAT.STAT.UZ</span>
                 <span class="text-[10px] font-bold bg-green-600 text-white px-2 py-1 rounded">DEMOKALKULYATOR</span>
-                <span class="text-[10px] font-bold bg-orange-500 text-white px-2 py-1 rounded">DEMOGRAFIYA.UZ</span>
+                <span class="text-[10px] font-bold bg-orange-500 text-white px-2 py-1 rounded">GEODEMOGRAFIYA.UZ</span>
             </div>
             <hr class="border-gray-100 mb-5">
             <a href="<?= BASE_URL ?>/user/laboratory/category.php?id=5" class="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white font-bold py-2.5 px-6 rounded-xl shadow-md hover:shadow-lg transition-all text-sm mx-auto min-w-[140px]">
@@ -133,7 +133,7 @@ $yoriqnoma_link = $yoriqnoma_item && !empty($yoriqnoma_item['file_path']) ? BASE
         </div>
     </div>
 
-    <!-- 6. Demografiya Videolar -->
+    <!-- 6. Geodemografiya Videolar -->
     <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col group">
         <div class="h-32 bg-gradient-to-br from-red-500 to-red-700 relative overflow-hidden flex items-center justify-center">
             <div class="absolute inset-0 bg-white/10 mix-blend-overlay"></div>
@@ -142,7 +142,7 @@ $yoriqnoma_link = $yoriqnoma_item && !empty($yoriqnoma_item['file_path']) ? BASE
             </div>
             <div class="relative z-10 flex items-center gap-3 text-white">
                 <i class="fab fa-youtube text-4xl"></i>
-                <h3 class="text-xl font-bold tracking-wide">Demografiya videolar</h3>
+                <h3 class="text-xl font-bold tracking-wide">Geodemografiya videolar</h3>
             </div>
         </div>
         <div class="p-6 flex flex-col flex-grow text-center">

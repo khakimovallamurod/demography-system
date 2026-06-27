@@ -53,7 +53,7 @@ include __DIR__ . '/../../includes/user_header.php';
 
 <div class="mb-6">
     <h2 class="text-xl font-bold text-gray-800">Ma'ruza mavzulari</h2>
-    <p class="text-sm text-gray-500 mt-1">Demografiya bo'yicha barcha ma'ruzalar to'plami</p>
+    <p class="text-sm text-gray-500 mt-1">Geodemografiya bo'yicha barcha ma'ruzalar to'plami</p>
 </div>
 
 <?php if (empty($lectures)): ?>

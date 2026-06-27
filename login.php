@@ -8,21 +8,27 @@ if (is_logged_in()) {
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username'] ?? '');
+    $phone = trim($_POST['phone'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    if (empty($username) || empty($password)) {
-        $error = 'Username va parolni kiriting!';
+    if (empty($phone) || empty($password)) {
+        $error = 'Telefon raqam va parolni kiriting!';
     } else {
-        $user = $db->get_data_by_table('users', ['username' => $db->escape($username)]);
+        $user = $db->get_data_by_table('users', ['phone' => $db->escape($phone)]);
         if ($user && md5($password) === $user['password']) {
             $_SESSION['user_id']   = $user['id'];
-            $_SESSION['username']  = $user['username'];
+            $_SESSION['phone']  = $user['phone'];
             $_SESSION['full_name'] = $user['full_name'];
             $_SESSION['role']      = $user['role'];
-            $user['role'] === 'admin' ? redirect('/admin/dashboard.php') : redirect('/user/dashboard.php');
+            if ($user['role'] === 'admin') {
+                redirect('/admin/dashboard.php');
+            } elseif ($user['role'] === 'teacher') {
+                redirect('/teacher/dashboard.php');
+            } else {
+                redirect('/user/dashboard.php');
+            }
         } else {
-            $error = 'Username yoki parol noto\'g\'ri!';
+            $error = 'Telefon raqam yoki parol noto\'g\'ri!';
         }
     }
 }
@@ -36,6 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/imask"></script>
 </head>
 <body class="min-h-screen bg-gray-100 flex items-center justify-center p-4">
 
@@ -45,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <!-- Logo inside card -->
             <div class="flex items-center gap-4 mb-6 pb-5 border-b border-gray-100">
                 <img src="<?= SITE_LOGO ?>" alt="<?= SITE_NAME ?> logo"
-                     class="h-20 w-auto object-contain flex-shrink-0"
+                     class="h-28 w-auto object-contain flex-shrink-0"
                      onerror="this.style.display='none'">
                 <div>
                     <h1 class="font-bold text-gray-800 leading-tight"><?= SITE_NAME ?></h1>
@@ -61,13 +68,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <form method="POST" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Foydalanuvchi nomi</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Telefon raqam</label>
                     <div class="relative">
-                        <i class="fas fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-                        <input type="text" name="username"
-                            value="<?= h($_POST['username'] ?? '') ?>"
+                        <i class="fas fa-phone absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="text" name="phone" id="phone"
+                            value="<?= h($_POST['phone'] ?? '') ?>"
                             class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                            placeholder="username" required autofocus>
+                            placeholder="+998 (__) ___-__-__" required autofocus>
                     </div>
                 </div>
 
@@ -108,6 +115,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         input.type  = input.type === 'password' ? 'text' : 'password';
         icon.className = input.type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var phoneMask = IMask(
+            document.getElementById('phone'), {
+                mask: '+{998} (00) 000-00-00'
+            }
+        );
+    });
     </script>
 </body>
 </html>

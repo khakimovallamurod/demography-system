@@ -29,7 +29,7 @@ $prompt = "Foydalanuvchi roli: {$roleLabel}\n"
     . "Savol: {$message}";
 
 $result = gemini_generate_text($prompt, [
-    'system_instruction' => "Sen demografiya o‘quv tizimi uchun AI yordamchisan. "
+    'system_instruction' => "Sen geodemografiya o‘quv tizimi uchun AI yordamchisan. "
         . "Foydalanuvchilarga tizimdagi sahifalar, testlar, materiallar va umumiy o‘quv jarayoni bo‘yicha tushunarli yordam ber. "
         . "Noaniq yoki maxfiy narsalarni o‘ylab topma.",
     'temperature' => 0.6,
